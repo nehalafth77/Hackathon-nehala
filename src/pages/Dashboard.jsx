@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   Search, Plus, Brain, HelpCircle, Calendar, ArrowRight,
   Sparkles, CheckCircle2, FileText, FolderOpen, ShieldCheck,
-  TrendingUp, Clock, ChevronRight, Zap, ExternalLink
+  TrendingUp, Clock, ChevronRight, Zap, ExternalLink,
+  Timer, Bookmark
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useVault } from '../context/VaultContext';
@@ -19,10 +20,12 @@ const SEARCH_SUGGESTIONS = [
 
 export const Dashboard = () => {
   const { user } = useAuth();
-  const { materials, revisionTasks, stats, setSearchQuery } = useVault();
+  const { materials, revisionTasks, stats, setSearchQuery, showToast } = useVault();
   const navigate = useNavigate();
 
   const [heroSearchInput, setHeroSearchInput] = useState('');
+  const [studyMinutes, setStudyMinutes] = useState(204); // 204 min = 68% of 300 min goal
+  const [recentTab, setRecentTab] = useState('all'); // 'all' | 'bookmarked'
 
   const handleHeroSearch = (queryText) => {
     const q = queryText || heroSearchInput;
@@ -39,8 +42,18 @@ export const Dashboard = () => {
   };
 
   // Filter recent materials
-  const recentMaterials = materials.slice(0, 4);
+  const allRecent = materials.slice(0, 6);
+  const bookmarked = materials.filter(m => m.isBookmarked).slice(0, 6);
+  const recentMaterials = (recentTab === 'bookmarked' ? bookmarked : allRecent).slice(0, 4);
   const pendingRevision = revisionTasks.filter(t => t.status === 'pending').slice(0, 3);
+
+  const studyGoalMinutes = 300;
+  const studyProgress = Math.min(100, Math.round((studyMinutes / studyGoalMinutes) * 100));
+
+  const handleLogStudySession = () => {
+    setStudyMinutes(prev => Math.min(studyGoalMinutes, prev + 30));
+    showToast('30 min study session logged! 🎯', 'success');
+  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
@@ -53,9 +66,19 @@ export const Dashboard = () => {
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
           {getGreeting()}, {user?.name?.split(' ')[0] || 'Arjun'} 👋
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          You're <strong className="text-slate-700 dark:text-slate-300">68%</strong> through your weekly study goals. Your scattered notes are synchronized and organized.
-        </p>
+        <div className="flex flex-wrap items-center gap-3 mt-2">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+            You're <strong className="text-slate-700 dark:text-slate-300">{studyProgress}%</strong> through your weekly study goal ({Math.round(studyMinutes / 60)}h {studyMinutes % 60}min / 5h). Scattered notes → organized.
+          </p>
+          <button
+            onClick={handleLogStudySession}
+            disabled={studyMinutes >= studyGoalMinutes}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-bold border border-emerald-200 dark:border-emerald-800 transition-colors disabled:opacity-50"
+          >
+            <Timer className="w-3.5 h-3.5" />
+            {studyMinutes >= studyGoalMinutes ? 'Goal Reached 🎉' : '+ Log 30 min Study Session'}
+          </button>
+        </div>
       </div>
 
       {/* Prominent AI Search Hero Box (Req #8 & #35) */}
@@ -283,12 +306,12 @@ export const Dashboard = () => {
                 </div>
                 <div className="flex items-center justify-between text-[11px] text-slate-500">
                   <span>{task.subject}</span>
-                  <Link
-                    to="/revision"
+                  <button
+                    onClick={() => navigate('/revision')}
                     className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
                   >
                     Review Now <ArrowRight size={11} />
-                  </Link>
+                  </button>
                 </div>
               </div>
             ))}
@@ -297,21 +320,53 @@ export const Dashboard = () => {
 
         {/* Recently Added Materials */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">Recently Organized Materials</h3>
               <p className="text-xs text-slate-500">Auto-tagged and checked for duplicates</p>
             </div>
-            <Link to="/vault" className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1">
-              Explore All Materials <ArrowRight size={12} />
-            </Link>
+            <div className="flex items-center gap-2">
+              {/* Filter Tabs */}
+              <div className="flex bg-slate-100 dark:bg-navy-900 p-1 rounded-xl gap-1 text-xs">
+                <button
+                  onClick={() => setRecentTab('all')}
+                  className={`px-3 py-1 rounded-lg font-semibold transition-colors ${
+                    recentTab === 'all'
+                      ? 'bg-white dark:bg-navy-800 text-slate-900 dark:text-white shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setRecentTab('bookmarked')}
+                  className={`px-3 py-1 rounded-lg font-semibold transition-colors flex items-center gap-1 ${
+                    recentTab === 'bookmarked'
+                      ? 'bg-white dark:bg-navy-800 text-amber-600 dark:text-amber-400 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  }`}
+                >
+                  <Bookmark size={11} /> Saved
+                </button>
+              </div>
+              <Link to="/vault" className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1">
+                All <ArrowRight size={12} />
+              </Link>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {recentMaterials.map(mat => (
-              <MaterialCard key={mat.id} material={mat} viewMode="grid" />
-            ))}
-          </div>
+          {recentMaterials.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {recentMaterials.map(mat => (
+                <MaterialCard key={mat.id} material={mat} viewMode="grid" />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-10 text-slate-400 text-xs bg-white dark:bg-navy-900 rounded-2xl border border-slate-200 dark:border-navy-800">
+              <Bookmark className="w-8 h-8 mx-auto mb-2 opacity-40" />
+              No bookmarked materials yet. Click the bookmark icon on any material to save it here.
+            </div>
+          )}
         </div>
       </div>
     </div>

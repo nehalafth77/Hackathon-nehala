@@ -4,18 +4,22 @@ import { useVault } from '../context/VaultContext';
 import { 
   Sparkles, Send, BookOpen, HelpCircle, FileText, 
   ExternalLink, RefreshCw, CheckCircle2, ChevronRight, 
-  Lightbulb, AlertCircle, Bot, User, ArrowRight
+  Lightbulb, AlertCircle, Bot, User, ArrowRight,
+  Copy, Check, Download, Calendar, Volume2, VolumeX
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function AIStudy() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { materials } = useVault();
+  const { materials, addRevisionTask } = useVault();
 
-  // Initial prompt can come from URL or defaults
   const initialPrompt = searchParams.get('ask') || 'Explain normalization in simple words.';
 
   const [inputMessage, setInputMessage] = useState('');
+  const [copiedId, setCopiedId] = useState(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
   const [messages, setMessages] = useState([
     {
       id: 'm1',
@@ -186,11 +190,53 @@ Feel free to click **[Generate Quiz]** below to test yourself on this exact conc
       setMessages(prev => [...prev, aiMsg]);
       setActiveSources(replySources);
       setIsTyping(false);
-    }, 900);
+    }, 700);
   };
 
-  const handleQuickAction = (actionPrompt) => {
-    handleSendMessage(actionPrompt);
+  const handleCopyMessage = (text, id) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    toast.success('Response copied to clipboard!');
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleAddResponseToRevision = (msg) => {
+    addRevisionTask({
+      subject: 'AI Study Notes',
+      topic: msg.text.slice(0, 35).replace(/[*#]/g, '').trim(),
+      unit: 'AI Workspace',
+      difficulty: 'Medium',
+      materialId: msg.sources?.[0]?.id || 'mat-1'
+    });
+  };
+
+  const handleExportChat = () => {
+    const formatted = messages.map(m => `[${m.timestamp}] ${m.sender.toUpperCase()}:\n${m.text}\n\n`).join('-------------------------\n');
+    const blob = new Blob([formatted], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `StudyVault_AI_Session_${new Date().toISOString().slice(0, 10)}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success('Study session exported as markdown file!');
+  };
+
+  const handleSpeakText = (text) => {
+    if (!window.speechSynthesis) return;
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+    const cleanText = text.replace(/[*#$`]/g, '');
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    setIsSpeaking(true);
+    window.speechSynthesis.speak(utterance);
   };
 
   return (
@@ -200,7 +246,7 @@ Feel free to click **[Generate Quiz]** below to test yourself on this exact conc
         {/* Chat Header */}
         <div className="p-4 px-5 border-b border-slate-200 dark:border-navy-800 flex items-center justify-between bg-slate-50/70 dark:bg-navy-950/60">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-vault-600 text-white flex items-center justify-center shadow-sm">
+            <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm">
               <Bot className="w-5 h-5" />
             </div>
             <div>
@@ -219,24 +265,36 @@ Feel free to click **[Generate Quiz]** below to test yourself on this exact conc
             </div>
           </div>
 
-          <button
-            onClick={() => {
-              setMessages([
-                {
-                  id: 'reset',
-                  sender: 'ai',
-                  text: 'Chat history cleared. What would you like to review from your study materials?',
-                  timestamp: 'Just now',
-                  sources: []
-                }
-              ]);
-              setActiveSources([]);
-            }}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-navy-800 transition-colors"
-            title="Clear Chat"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={handleExportChat}
+              className="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-slate-100 dark:hover:bg-navy-800 transition-colors"
+              title="Export Conversation as Notes"
+            >
+              <Download className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => {
+                if (window.speechSynthesis) window.speechSynthesis.cancel();
+                setIsSpeaking(false);
+                setMessages([
+                  {
+                    id: 'reset',
+                    sender: 'ai',
+                    text: 'Chat history cleared. What would you like to review from your study materials?',
+                    timestamp: 'Just now',
+                    sources: []
+                  }
+                ]);
+                setActiveSources([]);
+                toast.success('Conversation reset');
+              }}
+              className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-navy-800 transition-colors"
+              title="Clear Chat"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Message Stream */}
@@ -247,7 +305,7 @@ Feel free to click **[Generate Quiz]** below to test yourself on this exact conc
               className={`flex gap-3 ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {m.sender === 'ai' && (
-                <div className="w-8 h-8 rounded-lg bg-vault-100 dark:bg-vault-950/80 border border-vault-200 dark:border-vault-800 text-vault-600 dark:text-vault-400 flex items-center justify-center shrink-0 mt-1">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/80 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 mt-1">
                   <Sparkles className="w-4 h-4" />
                 </div>
               )}
@@ -255,7 +313,7 @@ Feel free to click **[Generate Quiz]** below to test yourself on this exact conc
               <div
                 className={`max-w-[85%] sm:max-w-[78%] rounded-2xl p-4 sm:p-5 shadow-sm text-sm leading-relaxed ${
                   m.sender === 'user'
-                    ? 'bg-vault-600 text-white rounded-br-none'
+                    ? 'bg-blue-600 text-white rounded-br-none'
                     : 'bg-slate-50 dark:bg-navy-950/80 text-slate-800 dark:text-slate-200 border border-slate-200/80 dark:border-navy-800 rounded-bl-none'
                 }`}
               >
@@ -275,15 +333,15 @@ Feel free to click **[Generate Quiz]** below to test yourself on this exact conc
                         <div
                           key={i}
                           onClick={() => navigate(`/material/${src.id}`)}
-                          className="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-800 hover:border-vault-400 cursor-pointer transition-colors"
+                          className="flex items-center justify-between p-2 rounded-lg bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-800 hover:border-blue-400 cursor-pointer transition-colors"
                         >
                           <div className="flex items-center gap-2 truncate">
-                            <FileText className="w-3.5 h-3.5 text-vault-600 shrink-0" />
+                            <FileText className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                             <span className="font-medium text-slate-800 dark:text-slate-200 truncate">
                               {src.title}
                             </span>
                           </div>
-                          <span className="text-[11px] text-vault-600 dark:text-vault-400 font-semibold shrink-0 ml-2">
+                          <span className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold shrink-0 ml-2">
                             {src.page}
                           </span>
                         </div>
@@ -292,9 +350,47 @@ Feel free to click **[Generate Quiz]** below to test yourself on this exact conc
                   </div>
                 )}
 
-                <div className={`text-[10px] mt-2 ${m.sender === 'user' ? 'text-vault-200 text-right' : 'text-slate-400'}`}>
-                  {m.timestamp}
-                </div>
+                {/* Footer Controls for AI message */}
+                {m.sender === 'ai' && (
+                  <div className="mt-3 pt-2 border-t border-slate-200/60 dark:border-navy-800/80 flex items-center justify-between text-xs text-slate-400">
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => handleCopyMessage(m.text, m.id)}
+                        className="hover:text-blue-600 flex items-center gap-1 text-[11px] transition-colors"
+                        title="Copy answer"
+                      >
+                        {copiedId === m.id ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                        <span>{copiedId === m.id ? 'Copied' : 'Copy'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleAddResponseToRevision(m)}
+                        className="hover:text-blue-600 flex items-center gap-1 text-[11px] transition-colors"
+                        title="Save to Revision Tasks"
+                      >
+                        <Calendar size={12} />
+                        <span>Add to Revision</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleSpeakText(m.text)}
+                        className="hover:text-blue-600 flex items-center gap-1 text-[11px] transition-colors"
+                        title="Read aloud"
+                      >
+                        {isSpeaking ? <VolumeX size={12} className="text-rose-500" /> : <Volume2 size={12} />}
+                        <span>{isSpeaking ? 'Stop' : 'Listen'}</span>
+                      </button>
+                    </div>
+
+                    <span className="text-[10px] text-slate-400">{m.timestamp}</span>
+                  </div>
+                )}
+
+                {m.sender === 'user' && (
+                  <div className="text-[10px] mt-2 text-blue-200 text-right">
+                    {m.timestamp}
+                  </div>
+                )}
               </div>
 
               {m.sender === 'user' && (
@@ -307,7 +403,7 @@ Feel free to click **[Generate Quiz]** below to test yourself on this exact conc
 
           {isTyping && (
             <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 pl-11">
-              <Sparkles className="w-3.5 h-3.5 text-vault-500 animate-spin" />
+              <Sparkles className="w-3.5 h-3.5 text-blue-500 animate-spin" />
               <span>Analyzing notes & synthesizing verified explanation...</span>
             </div>
           )}
@@ -315,31 +411,31 @@ Feel free to click **[Generate Quiz]** below to test yourself on this exact conc
           <div ref={chatBottomRef} />
         </div>
 
-        {/* Quick Action Buttons */}
+        {/* Quick Action Prompt Chips */}
         <div className="p-3 border-t border-slate-100 dark:border-navy-800/80 bg-slate-50/50 dark:bg-navy-950/40 flex flex-wrap gap-2">
           <button
-            onClick={() => handleQuickAction('Explain simpler with an intuitive analogy')}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-navy-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-navy-800 hover:bg-vault-50 hover:text-vault-700 hover:border-vault-200 transition-colors shadow-2xs"
+            onClick={() => handleSendMessage('Explain simpler with an intuitive analogy')}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-navy-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-navy-800 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-colors shadow-2xs"
           >
-            💡 Explain simpler
+            💡 Explain simpler (ELI5)
           </button>
           <button
-            onClick={() => handleQuickAction('Give a real world engineering example of 3NF vs BCNF')}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-navy-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-navy-800 hover:bg-vault-50 hover:text-vault-700 hover:border-vault-200 transition-colors shadow-2xs"
+            onClick={() => handleSendMessage('Give a real world engineering example of 3NF vs BCNF')}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-navy-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-navy-800 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-colors shadow-2xs"
           >
             🔍 Give example
           </button>
           <button
-            onClick={() => navigate('/quiz?topic=Normalization&subject=Database Management Systems')}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-vault-50 dark:bg-vault-950/60 text-vault-700 dark:text-vault-300 border border-vault-200 dark:border-vault-800 hover:bg-vault-100 transition-colors shadow-2xs flex items-center gap-1"
+            onClick={() => handleSendMessage('Explain Banker’s algorithm and Deadlock recovery in OS')}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-navy-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-navy-800 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-colors shadow-2xs"
           >
-            📝 Quiz me on this
+            ⚙️ OS Deadlock conditions
           </button>
           <button
-            onClick={() => navigate('/material/mat-1')}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-navy-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-navy-800 hover:bg-slate-100 transition-colors shadow-2xs flex items-center gap-1"
+            onClick={() => navigate('/quiz?topic=Normalization&subject=Database Management Systems')}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 transition-colors shadow-2xs flex items-center gap-1 font-semibold"
           >
-            📄 Show source document
+            📝 Quiz me on this
           </button>
         </div>
 
@@ -356,13 +452,13 @@ Feel free to click **[Generate Quiz]** below to test yourself on this exact conc
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Ask anything about your uploaded study materials..."
-              className="flex-1 bg-slate-50 dark:bg-navy-950 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-navy-800 focus:outline-none focus:ring-2 focus:ring-vault-500 text-sm text-slate-900 dark:text-white"
+              placeholder="Ask anything about your study notes, formulas, or exams..."
+              className="flex-1 bg-slate-50 dark:bg-navy-950 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-navy-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-slate-900 dark:text-white"
             />
             <button
               type="submit"
               disabled={!inputMessage.trim() || isTyping}
-              className="bg-vault-600 hover:bg-vault-700 disabled:opacity-50 text-white p-2.5 rounded-xl transition-colors shrink-0 shadow-sm"
+              className="btn btn-primary disabled:opacity-50 p-2.5 rounded-xl shadow-sm shrink-0"
             >
               <Send className="w-4 h-4" />
             </button>
@@ -374,7 +470,7 @@ Feel free to click **[Generate Quiz]** below to test yourself on this exact conc
       <div className="w-full lg:w-80 shrink-0 space-y-4">
         <div className="bg-white dark:bg-navy-900 rounded-2xl p-5 border border-slate-200 dark:border-navy-800 shadow-vault-sm">
           <div className="flex items-center gap-2 mb-3">
-            <BookOpen className="w-4 h-4 text-vault-600" />
+            <BookOpen className="w-4 h-4 text-blue-600" />
             <h3 className="text-sm font-bold text-slate-900 dark:text-white">
               Sources from your Vault
             </h3>
@@ -389,18 +485,18 @@ Feel free to click **[Generate Quiz]** below to test yourself on this exact conc
                 <div
                   key={idx}
                   onClick={() => navigate(`/material/${src.id}`)}
-                  className="p-3 rounded-xl bg-slate-50 dark:bg-navy-950/60 border border-slate-200 dark:border-navy-800 hover:border-vault-400 transition-all cursor-pointer group"
+                  className="p-3 rounded-xl bg-slate-50 dark:bg-navy-950/60 border border-slate-200 dark:border-navy-800 hover:border-blue-400 transition-all cursor-pointer group"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-100 group-hover:text-vault-600 transition-colors line-clamp-2">
+                    <span className="text-xs font-bold text-slate-800 dark:text-slate-100 group-hover:text-blue-600 transition-colors line-clamp-2">
                       {src.title}
                     </span>
-                    <ExternalLink className="w-3.5 h-3.5 text-slate-400 shrink-0 group-hover:text-vault-600" />
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-400 shrink-0 group-hover:text-blue-600" />
                   </div>
 
                   <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
                     <span>{src.subject}</span>
-                    <span className="font-semibold text-vault-600 dark:text-vault-400">{src.page}</span>
+                    <span className="font-semibold text-blue-600 dark:text-blue-400">{src.page}</span>
                   </div>
 
                   {src.verified && (
@@ -419,7 +515,7 @@ Feel free to click **[Generate Quiz]** below to test yourself on this exact conc
         </div>
 
         {/* AI Confidence & Exam Relevancy Card */}
-        <div className="bg-gradient-to-br from-vault-50 to-indigo-50/50 dark:from-navy-950 dark:to-vault-950/40 p-5 rounded-2xl border border-vault-100 dark:border-navy-800 shadow-vault-sm">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50/50 dark:from-navy-950 dark:to-blue-950/40 p-5 rounded-2xl border border-blue-100 dark:border-navy-800 shadow-vault-sm">
           <div className="flex items-center gap-2 mb-2">
             <Lightbulb className="w-4 h-4 text-amber-500" />
             <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
@@ -431,7 +527,7 @@ Feel free to click **[Generate Quiz]** below to test yourself on this exact conc
           </p>
           <button
             onClick={() => navigate('/quiz?topic=Normalization&subject=Database Management Systems')}
-            className="w-full bg-vault-600 hover:bg-vault-700 text-white font-semibold text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+            className="w-full btn btn-primary font-semibold text-xs py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 shadow-sm"
           >
             <span>Test Your Knowledge (Quiz)</span>
             <ArrowRight className="w-3.5 h-3.5" />

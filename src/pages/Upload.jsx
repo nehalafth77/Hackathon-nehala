@@ -5,13 +5,16 @@ import DuplicateModal from '../components/materials/DuplicateModal';
 import { 
   Upload as UploadIcon, FileText, CheckCircle2, AlertTriangle, 
   Sparkles, RefreshCw, ArrowRight, ShieldCheck, HardDrive, 
-  HelpCircle, X, Layers, Brain, FolderCheck 
+  HelpCircle, X, Layers, Brain, FolderCheck, Link as LinkIcon, 
+  PlayCircle, Globe 
 } from 'lucide-react';
 
 export default function Upload() {
   const navigate = useNavigate();
   const { addMaterial, checkDuplicate, showToast } = useVault();
 
+  const [uploadMode, setUploadMode] = useState('file'); // 'file' | 'link'
+  const [linkInput, setLinkInput] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState('idle'); // 'idle' | 'processing' | 'duplicate_detected' | 'success'
@@ -86,6 +89,31 @@ export default function Upload() {
     }, 650);
   };
 
+  // Handle URL/link submission
+  const handleLinkSubmit = (e) => {
+    e?.preventDefault();
+    const url = linkInput.trim();
+    if (!url) {
+      showToast('Please paste a valid URL', 'error');
+      return;
+    }
+    // Detect type
+    let resourceType = 'URL';
+    let detectedTitle = 'Web Resource';
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      resourceType = 'YouTube';
+      detectedTitle = 'YouTube Lecture: Database Normalization Explained';
+    } else if (url.includes('drive.google.com')) {
+      resourceType = 'Drive';
+      detectedTitle = 'Google Drive: DBMS Notes Shared Folder';
+    } else {
+      detectedTitle = 'Web Article: ' + url.split('/').filter(Boolean).slice(-1)[0] || 'Study Resource';
+    }
+    const mockFile = { name: detectedTitle, size: 0, type: resourceType };
+    setSelectedFile(mockFile);
+    startAIProcessing(detectedTitle);
+  };
+
   const finishProcessing = (fileName) => {
     // Check if this file triggers duplicate detection
     const dupCheck = checkDuplicate(fileName);
@@ -146,8 +174,36 @@ export default function Upload() {
         </p>
       </div>
 
-      {/* Main Drag & Drop Zone */}
+      {/* Mode Toggle: File Upload vs URL/Link */}
       {uploadStatus === 'idle' && (
+        <div className="flex gap-2 bg-slate-100 dark:bg-navy-900 p-1 rounded-2xl w-fit text-xs font-semibold">
+          <button
+            onClick={() => setUploadMode('file')}
+            className={`px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 ${
+              uploadMode === 'file'
+                ? 'bg-white dark:bg-navy-800 text-vault-600 shadow-sm'
+                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+            }`}
+          >
+            <UploadIcon className="w-4 h-4" />
+            Upload File
+          </button>
+          <button
+            onClick={() => setUploadMode('link')}
+            className={`px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 ${
+              uploadMode === 'link'
+                ? 'bg-white dark:bg-navy-800 text-vault-600 shadow-sm'
+                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+            }`}
+          >
+            <LinkIcon className="w-4 h-4" />
+            Paste URL / Link
+          </button>
+        </div>
+      )}
+
+      {/* Main Drag & Drop Zone */}
+      {uploadStatus === 'idle' && uploadMode === 'file' && (
         <div className="space-y-4">
           <div
             onDragEnter={handleDrag}
@@ -199,6 +255,68 @@ export default function Upload() {
               <span>✓ OCR Enabled for handwritten notes</span>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* URL / Link Paste Mode */}
+      {uploadStatus === 'idle' && uploadMode === 'link' && (
+        <div className="bg-white dark:bg-navy-900 rounded-3xl p-8 sm:p-10 border border-slate-200 dark:border-navy-800 shadow-vault-sm space-y-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 rounded-2xl bg-vault-50 dark:bg-vault-950/80 text-vault-600 dark:text-vault-400 flex items-center justify-center shadow-sm">
+              <LinkIcon className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Paste a Web or Drive Link</h3>
+              <p className="text-xs text-slate-500 mt-0.5">AI will extract the content, title, and categorize it into your vault.</p>
+            </div>
+          </div>
+
+          {/* Supported link type badges */}
+          <div className="flex flex-wrap gap-2 text-xs">
+            {[
+              { icon: Youtube, label: 'YouTube Lecture', color: 'text-red-600 bg-red-50 border-red-200 dark:bg-red-950/30 dark:border-red-900/50' },
+              { icon: Globe, label: 'Google Drive Folder', color: 'text-blue-600 bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-900/50' },
+              { icon: Globe, label: 'College Portal / LMS', color: 'text-indigo-600 bg-indigo-50 border-indigo-200 dark:bg-indigo-950/30 dark:border-indigo-900/50' },
+              { icon: Globe, label: 'Any Web Article', color: 'text-slate-600 bg-slate-50 border-slate-200 dark:bg-navy-950 dark:border-navy-800' },
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <span key={item.label} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-medium ${item.color}`}>
+                  <Icon className="w-3.5 h-3.5" /> {item.label}
+                </span>
+              );
+            })}
+          </div>
+
+          <form onSubmit={handleLinkSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Resource URL</label>
+              <input
+                type="url"
+                value={linkInput}
+                onChange={(e) => setLinkInput(e.target.value)}
+                placeholder="https://youtu.be/... or https://drive.google.com/..."
+                className="w-full bg-slate-50 dark:bg-navy-950 px-4 py-3 rounded-xl border border-slate-200 dark:border-navy-800 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-vault-500"
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="submit"
+                className="bg-vault-600 hover:bg-vault-700 text-white font-semibold text-sm px-6 py-3 rounded-xl shadow-sm transition-colors flex items-center gap-2"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Analyze & Save to Vault</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setLinkInput('https://youtu.be/dQw4w9WgXcQ')}
+                className="bg-slate-100 dark:bg-navy-800 hover:bg-slate-200 dark:hover:bg-navy-700 text-slate-700 dark:text-slate-200 text-sm font-semibold px-4 py-3 rounded-xl border border-slate-200 dark:border-navy-700 transition-colors flex items-center gap-2"
+              >
+                <Youtube className="w-4 h-4 text-red-600" />
+                Demo YouTube
+              </button>
+            </div>
+          </form>
         </div>
       )}
 

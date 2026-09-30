@@ -341,6 +341,44 @@ export const VaultProvider = ({ children }) => {
     setRecentSearches(prev => [q, ...prev.slice(0, 5)]);
   };
 
+  const deleteRevisionTask = (taskId) => {
+    saveRevisionTasks(revisionTasks.filter(t => t.id !== taskId));
+    toast.success('Task removed from revision queue');
+  };
+
+  const addCustomRevisionTask = ({ title, subject, unit, difficulty }) => {
+    const newTask = {
+      id: `rev_${Date.now()}`,
+      title: title || 'Custom Topic',
+      subject: subject || 'Computer Science',
+      unit: unit || 'Unit 1',
+      difficulty: difficulty || 'Medium',
+      scheduledFor: 'Today',
+      lastStudied: 'Added manually',
+      materialId: 'mat_01',
+      masteryPercentage: 30,
+      status: 'pending',
+      keyPoints: [
+        `Review and practice key formulas of ${title}`,
+        'Study previous year university questions',
+      ],
+    };
+    saveRevisionTasks([newTask, ...revisionTasks]);
+    toast.success(`"${title}" added to Revision Center`);
+  };
+
+  const resetToDefaults = () => {
+    localStorage.removeItem('studyvault_materials');
+    localStorage.removeItem('studyvault_revision');
+    localStorage.removeItem('studyvault_notifications');
+    localStorage.removeItem('studyvault_teacher_queue');
+    setMaterials(MOCK_MATERIALS);
+    setRevisionTasks(MOCK_REVISION_TASKS);
+    setNotifications(MOCK_NOTIFICATIONS);
+    setTeacherQueue(MOCK_TEACHER_PENDING_QUEUE);
+    toast.success('Workspace reset to clean default demonstration data');
+  };
+
   // Analytics stats
   const stats = useMemo(() => {
     const verified = materials.filter(m => m.isTeacherVerified).length + 24; // Baseline verified count
@@ -379,6 +417,9 @@ export const VaultProvider = ({ children }) => {
         addRevisionTask,
         replaceMaterial,
         markTaskComplete,
+        deleteRevisionTask,
+        addCustomRevisionTask,
+        resetToDefaults,
         addWeakTopicToRevision,
         approveMaterial,
         rejectMaterial,

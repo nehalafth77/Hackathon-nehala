@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, Navigate, NavLink } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { LayoutDashboard, FolderOpen, Search, Brain, Calendar } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 export const AppLayout = () => {
+  const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 overflow-hidden font-sans">

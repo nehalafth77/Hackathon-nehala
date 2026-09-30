@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useVault } from '../context/VaultContext';
 import { defaultQuizQuestions } from '../data/mockData';
 import { 
   Sparkles, CheckCircle2, XCircle, ArrowRight, RotateCcw, 
-  HelpCircle, Award, Brain, BookOpen, AlertCircle, ChevronRight 
+  HelpCircle, Award, Brain, BookOpen, AlertCircle, ChevronRight,
+  Clock, Copy, Check, Lightbulb 
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function QuizGenerator() {
   const [searchParams] = useSearchParams();
@@ -23,13 +25,35 @@ export default function QuizGenerator() {
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({}); // { 0: 1, 1: 2 }
   const [weakTopicsAdded, setWeakTopicsAdded] = useState(false);
+  const [timerSeconds, setTimerSeconds] = useState(0);
+  const [showHint, setShowHint] = useState(false);
+  const [copiedScore, setCopiedScore] = useState(false);
 
   const questions = defaultQuizQuestions;
+
+  // Active quiz timer
+  useEffect(() => {
+    let interval = null;
+    if (quizState === 'active') {
+      interval = setInterval(() => {
+        setTimerSeconds(s => s + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [quizState]);
+
+  const formatTimer = (secs) => {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
 
   const handleStartQuiz = () => {
     setSelectedAnswers({});
     setCurrentQuestionIdx(0);
     setWeakTopicsAdded(false);
+    setTimerSeconds(0);
+    setShowHint(false);
     setQuizState('active');
   };
 
@@ -41,6 +65,7 @@ export default function QuizGenerator() {
   };
 
   const handleNext = () => {
+    setShowHint(false);
     if (currentQuestionIdx < questions.length - 1) {
       setCurrentQuestionIdx(currentQuestionIdx + 1);
     } else {
@@ -49,6 +74,7 @@ export default function QuizGenerator() {
   };
 
   const handlePrev = () => {
+    setShowHint(false);
     if (currentQuestionIdx > 0) {
       setCurrentQuestionIdx(currentQuestionIdx - 1);
     }
@@ -83,7 +109,6 @@ export default function QuizGenerator() {
         });
       }
     });
-    // fallback if user got 100% or to demonstrate the hackathon requirement
     if (list.length === 0) {
       list.push({
         questionId: 'q-demo',
@@ -104,11 +129,19 @@ export default function QuizGenerator() {
     showToast('Weak topics successfully scheduled into Revision Center!', 'success');
   };
 
+  const handleCopyScore = () => {
+    const text = `🏆 StudyVault Quiz Results\nSubject: ${subject}\nTopic: ${topic}\nScore: ${scoreData.correct}/${scoreData.total} (${scoreData.percentage}%)\nTime: ${formatTimer(timerSeconds)}`;
+    navigator.clipboard.writeText(text);
+    setCopiedScore(true);
+    toast.success('Quiz results copied to clipboard!');
+    setTimeout(() => setCopiedScore(false), 2000);
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-vault-50 dark:bg-vault-950/60 text-vault-600 dark:text-vault-400 text-xs font-semibold mb-2 border border-vault-200 dark:border-vault-800">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 text-xs font-semibold mb-2 border border-blue-200 dark:border-blue-800">
           <Brain className="w-3.5 h-3.5" />
           Curriculum Grounded Assessment
         </div>
@@ -131,7 +164,7 @@ export default function QuizGenerator() {
               <select
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-navy-950 px-4 py-3 rounded-xl border border-slate-200 dark:border-navy-800 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-vault-500"
+                className="w-full bg-slate-50 dark:bg-navy-950 px-4 py-3 rounded-xl border border-slate-200 dark:border-navy-800 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="Database Management Systems">Database Management Systems</option>
                 <option value="Operating Systems">Operating Systems</option>
@@ -150,7 +183,7 @@ export default function QuizGenerator() {
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="e.g. Normalization, Deadlocks, TCP/IP"
-                className="w-full bg-slate-50 dark:bg-navy-950 px-4 py-3 rounded-xl border border-slate-200 dark:border-navy-800 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-vault-500"
+                className="w-full bg-slate-50 dark:bg-navy-950 px-4 py-3 rounded-xl border border-slate-200 dark:border-navy-800 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -166,7 +199,7 @@ export default function QuizGenerator() {
                     onClick={() => setDifficulty(d)}
                     className={`py-2.5 rounded-xl text-xs font-semibold border transition-all ${
                       difficulty === d
-                        ? 'bg-vault-600 text-white border-vault-600 shadow-sm'
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
                         : 'bg-slate-50 dark:bg-navy-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-navy-800'
                     }`}
                   >
@@ -183,7 +216,7 @@ export default function QuizGenerator() {
               <select
                 value={questionCount}
                 onChange={(e) => setQuestionCount(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-navy-950 px-4 py-3 rounded-xl border border-slate-200 dark:border-navy-800 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-vault-500"
+                className="w-full bg-slate-50 dark:bg-navy-950 px-4 py-3 rounded-xl border border-slate-200 dark:border-navy-800 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="5">5 Questions (Quick Check)</option>
                 <option value="10">10 Questions (Standard Quiz)</option>
@@ -192,16 +225,31 @@ export default function QuizGenerator() {
             </div>
           </div>
 
+          {/* Quick suggestions chips */}
+          <div className="flex items-center gap-2 flex-wrap text-xs pt-1">
+            <span className="text-slate-400 font-semibold">Suggested topics:</span>
+            {['BCNF vs 3NF', 'Banker’s Algorithm', 'TCP 3-Way Handshake', 'B-Tree Indexing'].map((s, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setTopic(s)}
+                className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-navy-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 hover:text-blue-600 text-[11px] transition-colors"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+
           <div className="pt-4 border-t border-slate-100 dark:border-navy-800 flex items-center justify-between">
             <span className="text-xs text-slate-400">
-              ✓ Grounded in 4 verified documents in your vault
+              ✓ Grounded in verified documents in your vault
             </span>
             <button
               onClick={handleStartQuiz}
-              className="bg-vault-600 hover:bg-vault-700 text-white font-semibold text-sm px-6 py-3 rounded-xl flex items-center gap-2 shadow-md transition-colors"
+              className="btn btn-primary text-sm px-6 py-3 font-bold shadow-md"
             >
               <Sparkles className="w-4 h-4" />
-              <span>Generate Quiz</span>
+              <span>Generate Quiz Now</span>
             </button>
           </div>
         </div>
@@ -210,20 +258,25 @@ export default function QuizGenerator() {
       {/* STAGE 2: Interactive Quiz Runner */}
       {quizState === 'active' && (
         <div className="bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-navy-800 shadow-vault-md space-y-6 animate-fadeIn">
-          {/* Quiz Top Progress */}
+          {/* Quiz Top Progress & Stopwatch */}
           <div className="flex items-center justify-between text-xs font-bold text-slate-500">
-            <span className="text-vault-600 dark:text-vault-400">
+            <span className="text-blue-600 dark:text-blue-400">
               Question {currentQuestionIdx + 1} of {questions.length}
             </span>
-            <span className="bg-slate-100 dark:bg-navy-800 px-2.5 py-1 rounded-lg">
-              {topic} • {difficulty}
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1 text-slate-600 dark:text-slate-300 font-mono bg-slate-100 dark:bg-navy-800 px-2 py-0.5 rounded">
+                <Clock size={12} /> {formatTimer(timerSeconds)}
+              </span>
+              <span className="bg-slate-100 dark:bg-navy-800 px-2.5 py-1 rounded-lg">
+                {topic} • {difficulty}
+              </span>
+            </div>
           </div>
 
           {/* Progress Bar */}
           <div className="w-full bg-slate-100 dark:bg-navy-950 h-2 rounded-full overflow-hidden">
             <div
-              className="bg-vault-600 h-full transition-all duration-300 rounded-full"
+              className="bg-blue-600 h-full transition-all duration-300 rounded-full"
               style={{
                 width: `${((currentQuestionIdx + 1) / questions.length) * 100}%`
               }}
@@ -249,14 +302,14 @@ export default function QuizGenerator() {
                   onClick={() => handleSelectOption(optIdx)}
                   className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center gap-3.5 ${
                     isSelected
-                      ? 'border-vault-600 bg-vault-50/70 dark:bg-vault-950/60 text-vault-900 dark:text-vault-100 shadow-xs'
+                      ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/60 text-blue-900 dark:text-blue-100 shadow-xs'
                       : 'border-slate-200 dark:border-navy-800 hover:border-slate-300 dark:hover:border-navy-700 bg-white dark:bg-navy-900 text-slate-700 dark:text-slate-300'
                   }`}
                 >
                   <div
                     className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
                       isSelected
-                        ? 'bg-vault-600 text-white'
+                        ? 'bg-blue-600 text-white'
                         : 'bg-slate-100 dark:bg-navy-800 text-slate-500'
                     }`}
                   >
@@ -266,6 +319,27 @@ export default function QuizGenerator() {
                 </div>
               );
             })}
+          </div>
+
+          {/* Hint Section */}
+          <div className="pt-2">
+            {showHint ? (
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-900 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2">
+                <Lightbulb size={16} className="text-amber-600 shrink-0 mt-0.5" />
+                <span>
+                  <strong>Exam Hint:</strong> {questions[currentQuestionIdx].explanation}
+                </span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowHint(true)}
+                className="text-xs text-blue-600 hover:underline flex items-center gap-1 font-semibold"
+              >
+                <Lightbulb size={13} />
+                <span>Need a hint?</span>
+              </button>
+            )}
           </div>
 
           {/* Nav Controls */}
@@ -281,7 +355,7 @@ export default function QuizGenerator() {
             <button
               onClick={handleNext}
               disabled={selectedAnswers[currentQuestionIdx] === undefined}
-              className="bg-vault-600 hover:bg-vault-700 disabled:opacity-40 text-white font-semibold text-xs px-5 py-2.5 rounded-xl shadow-sm transition-colors flex items-center gap-1.5"
+              className="btn btn-primary text-xs px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-1.5 font-bold"
             >
               <span>{currentQuestionIdx === questions.length - 1 ? 'Finish & See Results' : 'Next Question'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -295,18 +369,18 @@ export default function QuizGenerator() {
         <div className="bg-white dark:bg-navy-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-navy-800 shadow-vault-md space-y-6 animate-fadeIn">
           {/* Score Header */}
           <div className="text-center space-y-2 pb-6 border-b border-slate-100 dark:border-navy-800">
-            <div className="w-16 h-16 rounded-2xl bg-vault-50 dark:bg-vault-950/80 text-vault-600 dark:text-vault-400 mx-auto flex items-center justify-center shadow-sm">
+            <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 mx-auto flex items-center justify-center shadow-sm">
               <Award className="w-8 h-8" />
             </div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
               Quiz Completed!
             </h2>
             <p className="text-xs text-slate-500">
-              Subject: {subject} • {topic}
+              Subject: {subject} • {topic} • Time: {formatTimer(timerSeconds)}
             </p>
 
             <div className="inline-flex items-baseline gap-2 pt-2">
-              <span className="text-4xl font-extrabold text-vault-600 dark:text-vault-400">
+              <span className="text-4xl font-extrabold text-blue-600 dark:text-blue-400">
                 {scoreData.correct} / {scoreData.total}
               </span>
               <span className="text-sm font-semibold text-slate-500">
@@ -318,7 +392,7 @@ export default function QuizGenerator() {
           {/* Breakdown Section */}
           <div className="space-y-4">
             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-vault-600" />
+              <BookOpen className="w-4 h-4 text-blue-600" />
               Detailed Question Analysis & Explanations
             </h3>
 
@@ -366,7 +440,7 @@ export default function QuizGenerator() {
             </div>
           </div>
 
-          {/* Weak Topics Callout (Hackathon Step 10 Requirement) */}
+          {/* Weak Topics Callout */}
           <div className="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 space-y-3">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
@@ -408,17 +482,27 @@ export default function QuizGenerator() {
 
           {/* Action Row */}
           <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-navy-800">
-            <button
-              onClick={() => setQuizState('config')}
-              className="border border-slate-200 dark:border-navy-700 hover:bg-slate-50 dark:hover:bg-navy-800 text-slate-700 dark:text-slate-300 font-semibold text-xs px-4 py-2.5 rounded-xl transition-colors flex items-center gap-1.5"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Generate Another Quiz</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setQuizState('config')}
+                className="border border-slate-200 dark:border-navy-700 hover:bg-slate-50 dark:hover:bg-navy-800 text-slate-700 dark:text-slate-300 font-semibold text-xs px-4 py-2.5 rounded-xl transition-colors flex items-center gap-1.5"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Configure New Quiz</span>
+              </button>
+
+              <button
+                onClick={handleCopyScore}
+                className="border border-slate-200 dark:border-navy-700 hover:bg-slate-50 dark:hover:bg-navy-800 text-slate-700 dark:text-slate-300 font-semibold text-xs px-4 py-2.5 rounded-xl transition-colors flex items-center gap-1.5"
+              >
+                {copiedScore ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                <span>{copiedScore ? 'Copied!' : 'Share Score'}</span>
+              </button>
+            </div>
 
             <button
               onClick={() => navigate('/revision')}
-              className="bg-vault-600 hover:bg-vault-700 text-white font-semibold text-xs px-5 py-2.5 rounded-xl shadow-sm transition-colors flex items-center gap-1.5"
+              className="btn btn-primary font-semibold text-xs px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-1.5"
             >
               <span>Go to Revision Center</span>
               <ChevronRight className="w-4 h-4" />

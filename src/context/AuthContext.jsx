@@ -51,6 +51,16 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  const updateUser = (fields) => {
+    setUser(prev => ({
+      ...prev,
+      ...fields,
+      avatarInitials: fields.name
+        ? fields.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+        : prev.avatarInitials,
+    }));
+  };
+
   const logout = () => {
     setUser(null);
   };
@@ -63,6 +73,7 @@ export const AuthProvider = ({ children }) => {
         loginAs,
         loginWithCredentials,
         switchRole,
+        updateUser,
         logout,
         isAuthenticated: !!user,
         isTeacher: user?.role === 'teacher',
