@@ -1,67 +1,73 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authAPI } from '../services/api';
+import { MOCK_USER, MOCK_TEACHER } from '../data/mockData';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('studysphere_token'));
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('studyvault_user');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return MOCK_USER;
+      }
+    }
+    return MOCK_USER; // Default directly to logged-in student Arjun Sharma for instant product experience
+  });
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const initAuth = async () => {
-      const savedToken = localStorage.getItem('studysphere_token');
-      const savedUser = localStorage.getItem('studysphere_user');
-      
-      if (savedToken && savedUser) {
-        try {
-          setUser(JSON.parse(savedUser));
-          // Verify token is still valid
-          const res = await authAPI.getMe();
-          setUser(res.data.user);
-          localStorage.setItem('studysphere_user', JSON.stringify(res.data.user));
-        } catch {
-          localStorage.removeItem('studysphere_token');
-          localStorage.removeItem('studysphere_user');
-          setUser(null);
-        }
-      }
-      setLoading(false);
+    if (user) {
+      localStorage.setItem('studyvault_user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('studyvault_user');
+    }
+  }, [user]);
+
+  const loginAs = (role = 'student') => {
+    const selectedUser = role === 'teacher' ? MOCK_TEACHER : MOCK_USER;
+    setUser(selectedUser);
+    return selectedUser;
+  };
+
+  const loginWithCredentials = (email, password) => {
+    if (email.toLowerCase().includes('teacher') || email.toLowerCase().includes('prof')) {
+      return loginAs('teacher');
+    }
+    const studentUser = {
+      ...MOCK_USER,
+      email: email || MOCK_USER.email,
     };
-
-    initAuth();
-  }, []);
-
-  const login = async (email, password) => {
-    const res = await authAPI.login({ email, password });
-    const { token, user } = res.data;
-    localStorage.setItem('studysphere_token', token);
-    localStorage.setItem('studysphere_user', JSON.stringify(user));
-    setToken(token);
-    setUser(user);
-    return user;
+    setUser(studentUser);
+    return studentUser;
   };
 
-  const register = async (data) => {
-    const res = await authAPI.register(data);
-    const { token, user } = res.data;
-    localStorage.setItem('studysphere_token', token);
-    localStorage.setItem('studysphere_user', JSON.stringify(user));
-    setToken(token);
-    setUser(user);
-    return user;
+  const switchRole = () => {
+    setUser(prev => {
+      const next = prev?.role === 'teacher' ? MOCK_USER : MOCK_TEACHER;
+      return next;
+    });
   };
 
-  const logout = async () => {
-    try { await authAPI.logout(); } catch {}
-    localStorage.removeItem('studysphere_token');
-    localStorage.removeItem('studysphere_user');
-    setToken(null);
+  const logout = () => {
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        loginAs,
+        loginWithCredentials,
+        switchRole,
+        logout,
+        isAuthenticated: !!user,
+        isTeacher: user?.role === 'teacher',
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -3,121 +3,77 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
 // Context Providers
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { VaultProvider } from './context/VaultContext';
 
-// Layouts
-import DashboardLayout from './layouts/DashboardLayout';
+// Layout & Navigation Shell
+import AppLayout from './components/layout/AppLayout';
 
-// Public Pages
-import LandingPage from './pages/public/LandingPage';
-import Login from './pages/public/Login';
-import Register from './pages/public/Register';
-
-// Student Pages
-import StudentDashboard from './pages/student/Dashboard';
-import StudentMaterials from './pages/student/Materials';
-import StudentMaterialDetail from './pages/student/MaterialDetail';
-import StudentSearch from './pages/student/Search';
-import StudentBookmarks from './pages/student/Bookmarks';
-import StudentUpload from './pages/student/Upload';
-import StudentAIAssistant from './pages/student/AIAssistant';
-import StudentAnnouncements from './pages/student/Announcements';
-import StudentSettings from './pages/student/Settings';
-
-// Teacher Pages
-import TeacherDashboard from './pages/teacher/Dashboard';
-import TeacherVerification from './pages/teacher/Verification';
-import TeacherMaterials from './pages/teacher/Materials';
-import TeacherUpload from './pages/teacher/Upload';
-import TeacherAnnouncements from './pages/teacher/Announcements';
-import TeacherReports from './pages/teacher/Reports';
-import TeacherSettings from './pages/teacher/Settings';
-
-// Public Route Guard (Redirect to dashboard if already logged in)
-const PublicRoute = ({ children }) => {
-  const { user, loading } = useAuth();
-  if (loading) return null;
-  if (user) {
-    return <Navigate to={`/${user.role}/dashboard`} replace />;
-  }
-  return children;
-};
+// StudyVault Pages
+import Dashboard from './pages/Dashboard';
+import MyVault from './pages/MyVault';
+import SmartSearch from './pages/SmartSearch';
+import MaterialDetails from './pages/MaterialDetails';
+import Upload from './pages/Upload';
+import AIStudy from './pages/AIStudy';
+import Revision from './pages/Revision';
+import QuizGenerator from './pages/QuizGenerator';
+import VerifiedMaterials from './pages/VerifiedMaterials';
+import Notifications from './pages/Notifications';
+import Settings from './pages/Settings';
+import Login from './pages/Login';
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <BrowserRouter>
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 3500,
-              style: {
-                borderRadius: '12px',
-                background: '#1e293b',
-                color: '#fff',
-                fontSize: '13px',
-              },
-            }}
-          />
-
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route
-              path="/login"
-              element={
-                <PublicRoute>
-                  <Login />
-                </PublicRoute>
-              }
-            />
-            <Route
-              path="/register"
-              element={
-                <PublicRoute>
-                  <Register />
-                </PublicRoute>
-              }
+        <VaultProvider>
+          <BrowserRouter>
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 3500,
+                style: {
+                  borderRadius: '14px',
+                  background: '#0B1120',
+                  color: '#fff',
+                  border: '1px solid #1E293B',
+                  fontSize: '13px',
+                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3)',
+                },
+              }}
             />
 
-            {/* Student Protected Routes */}
-            <Route
-              path="/student"
-              element={<DashboardLayout requiredRole="student" />}
-            >
-              <Route index element={<Navigate to="/student/dashboard" replace />} />
-              <Route path="dashboard" element={<StudentDashboard />} />
-              <Route path="materials" element={<StudentMaterials />} />
-              <Route path="material/:id" element={<StudentMaterialDetail />} />
-              <Route path="search" element={<StudentSearch />} />
-              <Route path="bookmarks" element={<StudentBookmarks />} />
-              <Route path="upload" element={<StudentUpload />} />
-              <Route path="ai" element={<StudentAIAssistant />} />
-              <Route path="announcements" element={<StudentAnnouncements />} />
-              <Route path="settings" element={<StudentSettings />} />
-            </Route>
+            <Routes>
+              {/* Login / Welcome Screen */}
+              <Route path="/login" element={<Login />} />
 
-            {/* Teacher Protected Routes */}
-            <Route
-              path="/teacher"
-              element={<DashboardLayout requiredRole="teacher" />}
-            >
-              <Route index element={<Navigate to="/teacher/dashboard" replace />} />
-              <Route path="dashboard" element={<TeacherDashboard />} />
-              <Route path="verification" element={<TeacherVerification />} />
-              <Route path="materials" element={<TeacherMaterials />} />
-              <Route path="upload" element={<TeacherUpload />} />
-              <Route path="announcements" element={<TeacherAnnouncements />} />
-              <Route path="reports" element={<TeacherReports />} />
-              <Route path="settings" element={<TeacherSettings />} />
-            </Route>
+              {/* Main StudyVault Application Shell */}
+              <Route path="/" element={<AppLayout />}>
+                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="vault" element={<MyVault />} />
+                <Route path="search" element={<SmartSearch />} />
+                <Route path="material/:id" element={<MaterialDetails />} />
+                <Route path="upload" element={<Upload />} />
+                <Route path="ai" element={<AIStudy />} />
+                <Route path="quiz" element={<QuizGenerator />} />
+                <Route path="revision" element={<Revision />} />
+                <Route path="verified" element={<VerifiedMaterials />} />
+                <Route path="notifications" element={<Notifications />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
 
-            {/* Catch-all redirect */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
+              {/* Backwards compatibility redirects for old routes */}
+              <Route path="/student/*" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/teacher/*" element={<Navigate to="/verified" replace />} />
+
+              {/* Catch-all redirect */}
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </VaultProvider>
       </AuthProvider>
     </ThemeProvider>
   );

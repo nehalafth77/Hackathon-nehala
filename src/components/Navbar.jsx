@@ -1,14 +1,14 @@
-import React, { useState, useRef } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { notificationsAPI } from '../services/api';
 import {
   Search, Bell, Moon, Sun, ChevronDown, LogOut, Settings,
-  User, BookOpen, Upload, Home, FileText
+  Sparkles, CheckCircle2, Shield, User
 } from 'lucide-react';
 
-const Navbar = ({ onSearch }) => {
+const Navbar = () => {
   const { user, logout } = useAuth();
   const { isDark, toggle } = useTheme();
   const navigate = useNavigate();
@@ -47,58 +47,67 @@ const Navbar = ({ onSearch }) => {
   const getInitials = (name) => name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
 
   return (
-    <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 flex items-center px-6 gap-4 sticky top-0 z-30 shadow-sm">
-      {/* Search */}
+    <header className="h-16 bg-white/80 dark:bg-dark-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 flex items-center px-6 gap-4 sticky top-0 z-30 shadow-sm transition-colors duration-200">
+      {/* Search Input */}
       <form onSubmit={handleSearch} className="flex-1 max-w-xl">
-        <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div className="relative group">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
           <input
             type="text"
-            placeholder="Search materials, subjects, topics..."
+            placeholder="Search study notes, question papers, topics..."
             value={searchVal}
             onChange={e => setSearchVal(e.target.value)}
-            className="input pl-9 h-9 text-sm"
+            className="input pl-10 pr-16 h-10 text-xs sm:text-sm bg-slate-100/60 dark:bg-dark-850/80 border-slate-200/70 dark:border-slate-800/80 focus:bg-white dark:focus:bg-dark-900"
           />
+          <div className="hidden sm:flex items-center gap-0.5 absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-dark-800 text-[10px] font-semibold text-slate-400 pointer-events-none">
+            <span>Ctrl</span><span>K</span>
+          </div>
         </div>
       </form>
 
-      <div className="flex items-center gap-2 ml-auto">
+      <div className="flex items-center gap-2.5 ml-auto">
         {/* Dark mode toggle */}
         <button
           onClick={toggle}
-          className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/60 active:scale-95 transition-all"
+          title={isDark ? "Switch to light mode" : "Switch to dark mode"}
         >
-          {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          {isDark ? <Sun size={18} className="text-amber-400 animate-spin-slow" /> : <Moon size={18} className="text-indigo-600" />}
         </button>
 
-        {/* Notifications */}
+        {/* Notifications Popover */}
         <div className="relative">
           <button
             onClick={handleBellClick}
-            className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/60 active:scale-95 transition-all relative"
+            title="Notifications"
           >
             <Bell size={18} />
             {unread > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-gradient-to-r from-rose-500 to-amber-500 text-white text-[9px] font-extrabold rounded-full flex items-center justify-center shadow-sm">
                 {unread}
               </span>
             )}
           </button>
 
           {showNotifMenu && (
-            <div className="absolute right-0 top-11 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden z-50">
-              <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-                <h3 className="font-semibold text-sm text-gray-900 dark:text-white">Notifications</h3>
-                {unread > 0 && <span className="text-xs text-primary-600">{unread} unread</span>}
+            <div className="absolute right-0 top-12 w-80 bg-white/95 dark:bg-dark-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl shadow-glass overflow-hidden z-50 animate-slide-up">
+              <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between bg-slate-50/50 dark:bg-dark-850/50">
+                <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                  <Bell size={13} className="text-indigo-500" /> Notifications
+                </h3>
+                {unread > 0 && <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">{unread} unread</span>}
               </div>
-              <div className="max-h-72 overflow-y-auto">
+              <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60">
                 {notifications.length === 0 ? (
-                  <div className="py-8 text-center text-gray-400 text-sm">No notifications yet</div>
+                  <div className="py-8 text-center text-slate-400 text-xs">No notifications yet</div>
                 ) : (
                   notifications.map(n => (
-                    <div key={n._id} className={`px-4 py-3 border-b border-gray-50 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${!n.isRead ? 'bg-primary-50/50 dark:bg-primary-900/10' : ''}`}>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">{n.title}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{n.message}</p>
+                    <div key={n._id} className={`p-3.5 hover:bg-slate-50 dark:hover:bg-dark-850/60 transition-colors ${!n.isRead ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : ''}`}>
+                      <p className="text-xs font-semibold text-slate-900 dark:text-white flex items-center gap-1">
+                        <Sparkles size={11} className="text-indigo-500" /> {n.title}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">{n.message}</p>
                     </div>
                   ))
                 )}
@@ -107,45 +116,43 @@ const Navbar = ({ onSearch }) => {
           )}
         </div>
 
-        {/* User menu */}
+        {/* User Dropdown Menu */}
         <div className="relative">
           <button
             onClick={() => setShowUserMenu(v => !v)}
-            className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-100/80 dark:hover:bg-slate-800/60 transition-all active:scale-95"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white text-xs font-extrabold shadow-sm">
               {getInitials(user?.name)}
             </div>
             <div className="text-left hidden sm:block">
-              <p className="text-sm font-medium text-gray-900 dark:text-white leading-tight">{user?.name?.split(' ')[0]}</p>
-              <p className="text-xs text-gray-400 capitalize">{user?.role}</p>
+              <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight truncate max-w-[100px]">{user?.name?.split(' ')[0]}</p>
+              <p className="text-[10px] font-semibold text-slate-400 capitalize">{user?.role}</p>
             </div>
-            <ChevronDown size={14} className="text-gray-400" />
+            <ChevronDown size={14} className="text-slate-400" />
           </button>
 
           {showUserMenu && (
-            <div className="absolute right-0 top-11 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden z-50">
-              <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white">{user?.name}</p>
-                <p className="text-xs text-gray-500">{user?.email}</p>
+            <div className="absolute right-0 top-12 w-52 bg-white/95 dark:bg-dark-900/95 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl shadow-glass overflow-hidden z-50 animate-slide-up p-1.5">
+              <div className="px-3 py-2.5 border-b border-slate-100 dark:border-slate-800/80 mb-1">
+                <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{user?.name}</p>
+                <p className="text-[11px] text-slate-400 truncate">{user?.email}</p>
               </div>
-              <div className="p-1">
-                <Link
-                  to={`/${user?.role}/settings`}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  onClick={() => setShowUserMenu(false)}
-                >
-                  <Settings size={14} />
-                  Settings
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                >
-                  <LogOut size={14} />
-                  Logout
-                </button>
-              </div>
+              <Link
+                to={`/${user?.role}/settings`}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition-colors"
+                onClick={() => setShowUserMenu(false)}
+              >
+                <Settings size={14} className="text-slate-400" />
+                Settings & Preferences
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+              >
+                <LogOut size={14} />
+                Sign Out
+              </button>
             </div>
           )}
         </div>
@@ -155,3 +162,4 @@ const Navbar = ({ onSearch }) => {
 };
 
 export default Navbar;
+

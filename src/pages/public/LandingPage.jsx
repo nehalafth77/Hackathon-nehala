@@ -3,39 +3,37 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   GraduationCap, ArrowRight, Search, Upload, Brain, BookOpen,
-  CheckCircle, Shield, Zap, Users, Star, ChevronRight,
-  FileText, Image, Link as LinkIcon, MessageSquare, Database,
-  LayoutDashboard, Bookmark, Bell
+  CheckCircle2, ShieldCheck, Zap, Users, Star, ChevronRight,
+  FileText, Sparkles, Lock, Layers, Check, MessageSquare, Flame
 } from 'lucide-react';
 
-const FloatingCard = ({ icon: Icon, label, color, className }) => (
-  <div className={`absolute bg-white rounded-xl border border-gray-100 shadow-card-md px-3 py-2 flex items-center gap-2 animate-pulse-soft ${className}`}>
-    <div className={`w-7 h-7 rounded-lg ${color} flex items-center justify-center`}>
-      <Icon size={14} className="text-white" />
-    </div>
-    <span className="text-xs font-medium text-gray-700">{label}</span>
-  </div>
-);
-
-const FeatureCard = ({ icon: Icon, title, description, color }) => (
-  <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-card hover:shadow-card-md transition-all duration-300 group">
-    <div className={`w-12 h-12 rounded-xl ${color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
-      <Icon size={22} className="text-white" />
-    </div>
-    <h3 className="font-semibold text-gray-900 mb-2">{title}</h3>
-    <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
-  </div>
-);
-
-const StepCard = ({ num, title, description }) => (
-  <div className="flex gap-4">
-    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary-600 text-white font-bold flex items-center justify-center text-sm">
-      {num}
+const FloatingBadge = ({ icon: Icon, label, color, position }) => (
+  <motion.div
+    initial={{ y: 0 }}
+    animate={{ y: [-5, 5, -5] }}
+    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+    className={`absolute bg-white/90 dark:bg-dark-900/90 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-glass rounded-2xl px-4 py-2.5 flex items-center gap-3 z-20 ${position}`}
+  >
+    <div className={`w-8 h-8 rounded-xl ${color} flex items-center justify-center text-white shadow-md`}>
+      <Icon size={16} />
     </div>
     <div>
-      <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
-      <p className="text-sm text-gray-500">{description}</p>
+      <span className="block text-xs font-extrabold text-slate-900 dark:text-white">{label}</span>
+      <span className="block text-[10px] font-semibold text-emerald-500">Live Active</span>
     </div>
+  </motion.div>
+);
+
+const FeatureCard = ({ icon: Icon, title, description, badgeColor, badgeText }) => (
+  <div className="group bg-white/80 dark:bg-dark-900/80 backdrop-blur-xl rounded-3xl p-7 border border-slate-200/70 dark:border-slate-800/80 shadow-card hover:shadow-card-lg hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden">
+    <div className={`w-14 h-14 rounded-2xl ${badgeColor} flex items-center justify-center mb-5 text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+      <Icon size={26} />
+    </div>
+    <span className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-1 rounded-full border border-indigo-500/20 mb-3 inline-block">
+      {badgeText}
+    </span>
+    <h3 className="text-lg font-extrabold text-slate-900 dark:text-white mb-2 tracking-tight">{title}</h3>
+    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{description}</p>
   </div>
 );
 
@@ -43,7 +41,7 @@ const LandingPage = () => {
   const [count, setCount] = useState({ students: 0, materials: 0, colleges: 0 });
 
   useEffect(() => {
-    const targets = { students: 10000, materials: 50000, colleges: 100 };
+    const targets = { students: 12500, materials: 48000, colleges: 120 };
     const duration = 2000;
     const steps = 60;
     const interval = duration / steps;
@@ -64,352 +62,333 @@ const LandingPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-violet-600 flex items-center justify-center">
-              <GraduationCap size={18} className="text-white" />
+    <div className="min-h-screen bg-slate-50/80 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 overflow-x-hidden">
+      {/* Top Floating Glass Header */}
+      <nav className="sticky top-0 z-50 bg-white/70 dark:bg-dark-900/70 backdrop-blur-xl border-b border-slate-200/70 dark:border-slate-800/70 transition-all">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+              <GraduationCap size={22} className="text-white" />
             </div>
-            <span className="font-bold text-gray-900">StudySphere</span>
+            <div className="flex flex-col">
+              <span className="font-black text-slate-900 dark:text-white text-lg tracking-tight leading-none">
+                StudySphere
+              </span>
+              <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                Academic Hub
+              </span>
+            </div>
           </div>
 
-          <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-            <a href="#features" className="hover:text-gray-900 transition-colors">Features</a>
-            <a href="#how" className="hover:text-gray-900 transition-colors">How it works</a>
-            <a href="#ai" className="hover:text-gray-900 transition-colors">AI</a>
+          <div className="hidden md:flex items-center gap-8 text-xs font-semibold text-slate-600 dark:text-slate-300">
+            <a href="#features" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Features</a>
+            <a href="#comparison" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Why StudySphere</a>
+            <a href="#ai" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">AI Tutor</a>
           </div>
 
           <div className="flex items-center gap-3">
-            <Link to="/login" className="btn-ghost text-sm py-1.5 px-3">Sign In</Link>
-            <Link to="/register" className="btn-primary text-sm py-1.5 px-4">Get Started</Link>
+            <Link to="/login" className="btn-ghost text-xs py-2 px-4 font-semibold">
+              Sign In
+            </Link>
+            <Link to="/register" className="btn-primary text-xs py-2.5 px-5 font-bold shadow-indigo-500/25">
+              Get Started Free <ArrowRight size={14} />
+            </Link>
           </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-primary-50/40 to-violet-50/40 pt-20 pb-32">
-        {/* Decorative blobs */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-violet-200/30 to-primary-200/20 rounded-full -translate-y-1/2 translate-x-1/4 blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-primary-200/20 to-violet-200/10 rounded-full translate-y-1/2 -translate-x-1/4 blur-3xl" />
+      {/* Hero Section */}
+      <section className="relative pt-16 pb-28 overflow-hidden">
+        {/* Background Mesh Glow Blobs */}
+        <div className="absolute top-10 right-1/4 w-[500px] h-[500px] bg-gradient-to-bl from-indigo-500/20 via-violet-500/15 to-transparent rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-10 left-10 w-[400px] h-[400px] bg-gradient-to-tr from-cyan-500/15 via-indigo-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-50 border border-primary-200 rounded-full text-xs font-medium text-primary-700 mb-6">
-                <Zap size={12} />
-                Hackathon-Ready Academic Platform
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-gradient-to-r from-indigo-500/10 to-violet-500/10 border border-indigo-500/20 rounded-full text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-6 shadow-sm">
+                <Sparkles size={13} className="text-violet-500" />
+                <span>Next-Gen MERN Academic Workspace</span>
               </div>
 
-              <h1 className="text-5xl lg:text-6xl font-black text-gray-900 leading-tight mb-6">
-                Stop searching through{' '}
-                <span className="text-green-500">WhatsApp</span>{' '}
-                for your{' '}
-                <span className="gradient-text">notes.</span>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white leading-[1.15] tracking-tight mb-6">
+                From scattered chats to a{' '}
+                <span className="gradient-text">smarter study space.</span>
               </h1>
 
-              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                Collect, organize, search and understand all your study materials from one intelligent academic space. From scattered chats to a smarter study space.
+              <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 mb-8 leading-relaxed font-normal">
+                StudySphere consolidates notes, PYQs, lecture slides, and AIdoubt solving into one faculty-verified hub. Stop hunting through WhatsApp groups.
               </p>
 
-              <div className="flex items-center gap-3 mb-10">
-                <Link to="/register" className="btn-primary text-base px-6 py-3">
-                  Get Started Free
-                  <ArrowRight size={18} />
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-4 mb-10">
+                <Link to="/register" className="btn-primary text-sm px-7 py-3.5 font-bold shadow-lg shadow-indigo-500/25">
+                  Start Free Trial <ArrowRight size={18} />
                 </Link>
-                <Link to="/login" className="btn-secondary text-base px-6 py-3">
-                  Explore Demo
+                <Link to="/login" className="btn-secondary text-sm px-6 py-3.5 font-bold">
+                  ⚡ Try Demo Login
                 </Link>
               </div>
 
-              {/* Stats */}
-              <div className="flex items-center gap-6">
+              {/* Stats Counters */}
+              <div className="grid grid-cols-4 gap-4 p-4 rounded-2xl bg-white/50 dark:bg-dark-900/50 backdrop-blur-md border border-slate-200/60 dark:border-slate-800/60">
                 {[
-                  { num: `${(count.students / 1000).toFixed(0)}K+`, label: 'Students' },
-                  { num: `${(count.materials / 1000).toFixed(0)}K+`, label: 'Study Materials' },
+                  { num: `${(count.students / 1000).toFixed(1)}k+`, label: 'Active Students' },
+                  { num: `${(count.materials / 1000).toFixed(0)}k+`, label: 'Verified Notes' },
                   { num: `${count.colleges}+`, label: 'Colleges' },
-                  { num: '4.9/5', label: 'Rating' },
+                  { num: '4.9/5', label: 'Satisfaction' },
                 ].map(({ num, label }) => (
                   <div key={label} className="text-center">
-                    <p className="text-xl font-black text-gray-900">{num}</p>
-                    <p className="text-xs text-gray-500">{label}</p>
+                    <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">{num}</p>
+                    <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">{label}</p>
                   </div>
                 ))}
               </div>
             </motion.div>
 
-            {/* Hero illustration */}
+            {/* Interactive Hero Illustration */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.7, delay: 0.2 }}
               className="relative hidden lg:block"
             >
-              {/* Main dashboard mockup */}
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-card-lg overflow-hidden">
-                <div className="bg-gradient-to-r from-primary-600 to-violet-600 p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-6 h-6 rounded-md bg-white/20 flex items-center justify-center">
-                      <GraduationCap size={14} className="text-white" />
+              {/* Glass Preview Card */}
+              <div className="bg-white/90 dark:bg-dark-900/90 backdrop-blur-2xl rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-card-lg overflow-hidden">
+                <div className="bg-gradient-to-r from-indigo-600 via-indigo-600 to-violet-600 p-5 text-white">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
+                        <GraduationCap size={16} />
+                      </div>
+                      <span className="font-extrabold text-sm">StudySphere Student Hub</span>
                     </div>
-                    <span className="text-white font-semibold text-sm">StudySphere</span>
+                    <span className="text-[10px] font-bold bg-white/20 px-2.5 py-1 rounded-full uppercase">CS & Engg</span>
                   </div>
-                  <p className="text-white/80 text-xs">Good morning, Student 👋</p>
-                  <p className="text-white font-bold">Continue learning and stay organized</p>
+                  <p className="text-xs text-white/80 font-medium">Semester 6 • Computer Science & Engineering</p>
                 </div>
 
-                <div className="p-4 space-y-2">
+                <div className="p-5 space-y-3">
                   {[
-                    { title: 'OS_Deadlock_Notes.pdf', subject: 'Operating Systems • Unit 3', status: 'verified', color: 'text-red-500 bg-red-50' },
-                    { title: 'DBMS_Normalization.pdf', subject: 'DBMS • Unit 3', status: 'verified', color: 'text-blue-500 bg-blue-50' },
-                    { title: 'Java_OOP_Notes.pdf', subject: 'Java • Unit 2', status: 'pending', color: 'text-orange-500 bg-orange-50' },
-                  ].map((m, i) => (
-                    <div key={i} className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-                      <div className={`w-8 h-8 rounded-lg ${m.color.split(' ')[1]} flex items-center justify-center`}>
-                        <FileText size={14} className={m.color.split(' ')[0]} />
+                    { title: 'OS_Deadlock_Avoidance_Notes.pdf', sub: 'Operating Systems • Unit 3', badge: '✓ Teacher Verified', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' },
+                    { title: 'DBMS_Normalization_3NF_BCNF.pdf', sub: 'DBMS • Unit 2', badge: '★ High Yield PYQ', color: 'bg-violet-500/10 text-violet-600 border-violet-500/20' },
+                    { title: 'CN_TCP_vs_UDP_Header_Diagrams.pdf', sub: 'Networks • Unit 4', badge: '✓ Official Handout', color: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20' },
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-slate-50 dark:bg-dark-850 border border-slate-200/50 dark:border-slate-800/50 hover:border-indigo-500/40 transition-colors">
+                      <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center flex-shrink-0">
+                        <FileText size={18} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-gray-800 truncate">{m.title}</p>
-                        <p className="text-[10px] text-gray-400">{m.subject}</p>
+                        <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{item.title}</p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">{item.sub}</p>
                       </div>
-                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                        m.status === 'verified' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                      }`}>
-                        {m.status === 'verified' ? '✓ Verified' : '⏳ Pending'}
+                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${item.color}`}>
+                        {item.badge}
                       </span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Floating cards */}
-              <FloatingCard icon={Upload} label="Material Uploaded" color="bg-green-500" className="-top-4 -left-6 animate-bounce" style={{ animationDelay: '0.5s' }} />
-              <FloatingCard icon={CheckCircle} label="Teacher Verified!" color="bg-primary-500" className="-bottom-4 -right-4" />
-              <FloatingCard icon={Brain} label="AI Assistant" color="bg-violet-500" className="top-1/2 -right-8" />
+              {/* Floating Live Badges */}
+              <FloatingBadge icon={Upload} label="Resource Verified" color="bg-emerald-500" position="-top-4 -left-6" />
+              <FloatingBadge icon={Brain} label="AI Doubt Solved" color="bg-violet-600" position="top-1/2 -right-8" />
+              <FloatingBadge icon={ShieldCheck} label="Faculty Verified" color="bg-indigo-600" position="-bottom-4 -left-4" />
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Problem / Solution */}
-      <section className="py-20 bg-white">
+      {/* Before vs After Comparison */}
+      <section id="comparison" className="py-20 bg-white dark:bg-dark-900/60 border-y border-slate-200/70 dark:border-slate-800/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">From Chaos to Clarity</h2>
-            <p className="text-gray-500">StudySphere helps you organize all your study materials in one place.</p>
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <span className="text-xs font-extrabold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 rounded-full border border-indigo-500/20">
+              The Academic Upgrade
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mt-3 mb-3 tracking-tight">
+              From Chaos to Total Organization
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              See why thousands of students switched from messy group chats to StudySphere.
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {/* Before */}
-            <div className="bg-red-50 border border-red-100 rounded-2xl p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">✕</span>
+            <div className="bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200/80 dark:border-rose-900/40 rounded-3xl p-7">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 rounded-full bg-rose-500 text-white font-bold flex items-center justify-center text-sm">
+                  ✕
                 </div>
-                <h3 className="font-bold text-red-800">Before StudySphere</h3>
+                <h3 className="font-extrabold text-rose-900 dark:text-rose-300 text-lg">Before StudySphere</h3>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {[
-                  { name: 'Module-2-notes.pdf', time: '2:14 PM', platform: '💬 WhatsApp Group 1' },
-                  { name: 'Important link.url', time: '2:30 PM', platform: '💬 WhatsApp Group 2' },
-                  { name: 'Question paper.pdf', time: 'Yesterday', platform: '💬 WhatsApp Group 3' },
-                  { name: 'Assignment details...', time: 'Yesterday', platform: '💬 WhatsApp Group 4' },
+                  { title: 'Unit-3-notes.pdf', source: '💬 WhatsApp Group 1 (300+ unread)' },
+                  { title: 'Important_PYQ_link.url', source: '💬 Random Chat (Lost in scroll)' },
+                  { title: 'Assignment_Doc_v2.pdf', source: '💬 Expired link download' },
                 ].map((item, i) => (
-                  <div key={i} className="bg-white rounded-lg p-3 border border-red-100 flex items-center justify-between">
+                  <div key={i} className="bg-white dark:bg-dark-900 rounded-2xl p-4 border border-rose-200/60 dark:border-rose-900/40 flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-800">{item.name}</p>
-                      <p className="text-xs text-gray-400">{item.platform}</p>
+                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{item.title}</p>
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400 mt-0.5">{item.source}</p>
                     </div>
-                    <span className="text-xs text-gray-400">{item.time}</span>
                   </div>
                 ))}
-                <p className="text-xs text-red-600 font-medium text-center mt-3">😩 Scattered across multiple WhatsApp groups</p>
               </div>
             </div>
 
             {/* After */}
-            <div className="bg-green-50 border border-green-100 rounded-2xl p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">✓</span>
+            <div className="bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/40 rounded-3xl p-7">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-sm">
+                  ✓
                 </div>
-                <h3 className="font-bold text-green-800">After StudySphere</h3>
+                <h3 className="font-extrabold text-emerald-900 dark:text-emerald-300 text-lg">With StudySphere</h3>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {[
-                  { name: 'Computer Design', materials: '12 materials', icon: '💻' },
-                  { name: 'Computer Graphics', materials: '8 materials', icon: '🎨' },
-                  { name: 'Operating Systems', materials: '15 materials', icon: '⚙️' },
-                  { name: 'Java Programming', materials: '10 materials', icon: '☕' },
-                ].map((s, i) => (
-                  <div key={i} className="bg-white rounded-lg p-3 border border-green-100 flex items-center gap-3">
-                    <span className="text-xl">{s.icon}</span>
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">{s.name}</p>
-                      <p className="text-xs text-green-600">{s.materials}</p>
+                  { title: 'Operating Systems', count: '18 Verified Resources • PYQs Included', icon: '💻' },
+                  { title: 'Database Systems', count: '14 Faculty Handouts • Revision Sheets', icon: '🗄️' },
+                  { title: 'Computer Networks', count: '12 Curated Video Links & PPTs', icon: '🌐' },
+                ].map((item, i) => (
+                  <div key={i} className="bg-white dark:bg-dark-900 rounded-2xl p-4 border border-emerald-200/60 dark:border-emerald-900/40 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">{item.icon}</span>
+                      <div>
+                        <p className="text-xs font-bold text-slate-900 dark:text-white">{item.title}</p>
+                        <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">{item.count}</p>
+                      </div>
                     </div>
-                    <ChevronRight size={14} className="ml-auto text-gray-300" />
                   </div>
                 ))}
-                <p className="text-xs text-green-600 font-medium text-center mt-3">✨ Organized, searchable and easily accessible</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section id="features" className="py-20 bg-gray-50">
+      {/* Feature Grid */}
+      <section id="features" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">Powerful Features for Smarter Learning</h2>
-            <p className="text-gray-500 max-w-2xl mx-auto">Everything you need to collect, organize, verify and understand your study materials.</p>
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <span className="text-xs font-extrabold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 rounded-full border border-indigo-500/20">
+              Complete Feature Suite
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white mt-3 mb-3 tracking-tight">
+              Engineered for Modern Universities
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              Everything required to collect, organize, verify, and master academic materials.
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-7">
             <FeatureCard
               icon={Upload}
-              title="Organize & Store"
-              description="Upload PDFs, notes, PPTs, images and links. All study materials in one intelligent space."
-              color="bg-primary-500"
+              title="Organized Material Vault"
+              description="Upload PDFs, notes, PPTs, images, and links cleanly tagged by branch, semester, and unit."
+              badgeColor="bg-indigo-600"
+              badgeText="STORAGE & HUB"
             />
             <FeatureCard
               icon={Search}
-              title="Smart Search"
-              description="Find any material instantly. Search by subject, topic, unit, tags or description."
-              color="bg-violet-500"
+              title="Instant Subject Filter"
+              description="Find any note or PYQ in milliseconds by topic chips, keywords, or exam difficulty tags."
+              badgeColor="bg-violet-600"
+              badgeText="FAST SEARCH"
             />
             <FeatureCard
               icon={Brain}
-              title="AI Assistant"
-              description="Ask questions, get explanations, generate quizzes and summaries powered by AI."
-              color="bg-pink-500"
+              title="AI Academic Tutor"
+              description="Ask complex technical questions, generate practice MCQs, and condense long units into bullet points."
+              badgeColor="bg-pink-600"
+              badgeText="GEMINI AI"
             />
             <FeatureCard
-              icon={BookOpen}
-              title="Subject Management"
-              description="Keep everything organized by subject, topic and unit. Never lose a note again."
-              color="bg-green-500"
+              icon={ShieldCheck}
+              title="Faculty Verification"
+              description="Teachers review student uploads, adding Official Handout and High Yield badges."
+              badgeColor="bg-emerald-600"
+              badgeText="VERIFICATION"
             />
             <FeatureCard
-              icon={Bookmark}
-              title="Bookmarks & Pins"
-              description="Save important materials to your bookmarks. Pin critical resources to the top."
-              color="bg-orange-500"
+              icon={Zap}
+              title="Instant Quiz Generator"
+              description="Generate 5-question multiple choice quizzes based on specific subjects with instant grading."
+              badgeColor="bg-amber-600"
+              badgeText="SELF TEST"
             />
             <FeatureCard
-              icon={Shield}
-              title="Teacher Verification"
-              description="Teachers verify student uploads. Trust only quality, verified academic content."
-              color="bg-blue-500"
+              icon={MessageSquare}
+              title="1-Click WhatsApp Upload"
+              description="Import messy group chat notes directly into organized StudySphere subjects without clutter."
+              badgeColor="bg-cyan-600"
+              badgeText="EASY IMPORT"
             />
           </div>
         </div>
       </section>
 
-      {/* How it works */}
-      <section id="how" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* AI Spotlight Section */}
+      <section id="ai" className="py-20 bg-gradient-to-br from-indigo-950 via-dark-900 to-slate-950 text-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">How StudySphere Works</h2>
-              <p className="text-gray-500 mb-8">A simple 5-step process to transform how you study.</p>
-
-              <div className="space-y-6">
-                <StepCard num={1} title="Collect" description="Upload all your study materials from WhatsApp, Drive, or directly to StudySphere." />
-                <StepCard num={2} title="Organize" description="Materials are automatically sorted by subject, topic, and unit." />
-                <StepCard num={3} title="Verify" description="Teachers review and verify uploaded materials for quality and accuracy." />
-                <StepCard num={4} title="Search" description="Find any material instantly with our powerful search engine." />
-                <StepCard num={5} title="Learn" description="Use our AI assistant to understand, summarize, and quiz yourself." />
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-violet-500/20 border border-violet-500/30 rounded-full text-xs font-bold text-violet-300 mb-6">
+                <Brain size={14} /> 24/7 AI Tutor
               </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-primary-50 to-violet-50 rounded-2xl p-8 border border-primary-100">
-              <div className="text-center mb-6">
-                <div className="text-4xl mb-2">🎯</div>
-                <h3 className="font-bold text-gray-900 text-lg">The StudySphere Flow</h3>
-              </div>
-              <div className="space-y-3">
-                {['COLLECT', 'ORGANIZE', 'VERIFY', 'SEARCH', 'UNDERSTAND', 'REVISE'].map((step, i) => (
-                  <div key={step} className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
-                      {i + 1}
-                    </div>
-                    <div className="flex-1 bg-white rounded-lg p-3 border border-primary-100 font-semibold text-sm text-gray-800">
-                      {step}
-                    </div>
-                    {i < 5 && <div className="text-primary-300 rotate-90">↓</div>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* AI Section */}
-      <section id="ai" className="py-20 bg-gradient-to-br from-primary-900 via-violet-900 to-primary-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 border border-white/20 rounded-full text-xs font-medium text-white/80 mb-6">
-                <Brain size={12} />
-                Powered by AI
-              </div>
-              <h2 className="text-3xl font-bold mb-4">Your Personal AI Study Assistant</h2>
-              <p className="text-white/70 mb-8 leading-relaxed">
-                Struggling with a tough concept? Ask our AI. Need a summary of a 100-page PDF? Done in seconds. Want practice MCQs? Generate them instantly.
+              <h2 className="text-3xl sm:text-4xl font-extrabold mb-4 leading-tight">
+                Supercharge Your Revision with AI
+              </h2>
+              <p className="text-sm text-slate-300 leading-relaxed mb-6">
+                Struggling with deadlocks or database normalization? Ask StudySphere AI to break down complex topics with real-world analogies, code snippets, and self-assessment quizzes.
               </p>
               <div className="space-y-3">
                 {[
-                  'Summarize any PDF in seconds',
-                  'Explain complex concepts simply',
-                  'Generate MCQ quizzes automatically',
-                  'Get key revision points',
-                  'Works even without internet AI keys (mock fallback)',
-                ].map(f => (
-                  <div key={f} className="flex items-center gap-2 text-sm text-white/80">
-                    <CheckCircle size={16} className="text-green-400 flex-shrink-0" />
-                    {f}
+                  'Doubt solver with analogies and step-by-step math/code explanations',
+                  'Auto-generate practice MCQ tests with instant evaluation',
+                  'Condense 80-page slides into bullet point revision sheets',
+                  'Offline evaluation fallback guarantees zero downtime during hackathons',
+                ].map((text, i) => (
+                  <div key={i} className="flex items-center gap-3 text-xs font-semibold text-slate-200">
+                    <CheckCircle2 size={16} className="text-emerald-400 flex-shrink-0" />
+                    <span>{text}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* AI Chat mockup */}
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl overflow-hidden">
-              <div className="bg-white/5 border-b border-white/10 px-4 py-3 flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-400 to-pink-400 flex items-center justify-center">
-                  <Brain size={16} className="text-white" />
+            {/* AI Console Mockup */}
+            <div className="bg-dark-900/90 border border-white/10 rounded-3xl p-6 shadow-2xl backdrop-blur-xl space-y-4">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-violet-500 to-indigo-500 flex items-center justify-center">
+                    <Brain size={16} className="text-white" />
+                  </div>
+                  <span className="text-sm font-bold">StudySphere AI Workspace</span>
                 </div>
-                <span className="text-sm font-semibold">AI Assistant</span>
+                <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                  Online
+                </span>
               </div>
-              <div className="p-4 space-y-3">
-                <div className="flex justify-end">
-                  <div className="bg-primary-600 rounded-xl rounded-br-sm px-3 py-2 max-w-xs">
-                    <p className="text-sm">Explain deadlock in simple words</p>
-                  </div>
+
+              <div className="space-y-3 text-xs">
+                <div className="bg-indigo-600/30 border border-indigo-500/30 rounded-2xl p-3.5 ml-auto max-w-xs text-right">
+                  <p className="font-medium">Explain Deadlock condition in Operating Systems</p>
                 </div>
-                <div className="flex gap-2">
-                  <div className="w-7 h-7 rounded-full bg-violet-500 flex items-center justify-center flex-shrink-0">
-                    <Brain size={14} className="text-white" />
-                  </div>
-                  <div className="bg-white/10 rounded-xl rounded-bl-sm px-3 py-2 max-w-xs">
-                    <p className="text-sm text-white/90">🔒 <strong>Deadlock</strong> is like a traffic jam where no car can move...</p>
-                    <p className="text-xs text-white/50 mt-1">Explained simply • Key points • Examples</p>
-                  </div>
-                </div>
-                <div className="flex gap-2 mt-4">
-                  {['Summarize PDF', 'Generate Quiz', 'Explain Simply'].map(btn => (
-                    <button key={btn} className="text-xs px-2.5 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg transition-colors">
-                      {btn}
-                    </button>
-                  ))}
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 max-w-md space-y-2">
+                  <p className="font-bold text-violet-300 flex items-center gap-1.5">
+                    <Sparkles size={12} /> AI Tutor Explanation:
+                  </p>
+                  <p className="text-slate-300 leading-relaxed">
+                    Deadlock occurs when 4 necessary conditions hold simultaneously: <strong>Mutual Exclusion, Hold and Wait, No Preemption,</strong> and <strong>Circular Wait</strong>. Imagine 4 cars arriving at a 4-way stop sign at the exact same moment...
+                  </p>
                 </div>
               </div>
             </div>
@@ -417,71 +396,28 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 bg-gradient-to-br from-primary-50 to-violet-50">
-        <div className="max-w-3xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-black text-gray-900 mb-4">Ready to organize your study materials?</h2>
-          <p className="text-gray-500 mb-8">Join thousands of students who are already using StudySphere to learn smarter.</p>
-          <div className="flex items-center justify-center gap-3">
-            <Link to="/register" className="btn-primary text-base px-8 py-3">
-              Get Started for Free
-              <ArrowRight size={18} />
+      {/* Footer CTA */}
+      <section className="py-20 bg-gradient-to-tr from-indigo-600 to-violet-600 text-white text-center">
+        <div className="max-w-4xl mx-auto px-4">
+          <h2 className="text-3xl sm:text-4xl font-extrabold mb-4 tracking-tight">
+            Ready to upgrade your academic experience?
+          </h2>
+          <p className="text-sm text-white/80 max-w-xl mx-auto mb-8">
+            Join thousands of engineering and university students who keep their study materials organized with StudySphere.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link to="/register" className="btn-secondary bg-white text-indigo-700 hover:bg-slate-100 text-sm px-8 py-3.5 font-bold shadow-lg">
+              Get Started for Free <ArrowRight size={16} />
             </Link>
-            <Link to="/login" className="btn-secondary text-base px-6 py-3">
-              Sign In
+            <Link to="/login" className="btn-ghost text-white hover:bg-white/10 text-sm px-6 py-3.5 font-bold border border-white/30">
+              Login to Demo Account
             </Link>
           </div>
-          <p className="text-xs text-gray-400 mt-4">10K+ students already joined</p>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-violet-600 flex items-center justify-center">
-                  <GraduationCap size={16} className="text-white" />
-                </div>
-                <span className="font-bold">StudySphere</span>
-              </div>
-              <p className="text-sm text-gray-400">All your study materials. One intelligent platform.</p>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-sm mb-3">Product</h4>
-              <div className="space-y-2 text-sm text-gray-400">
-                <p>Features</p><p>Pricing</p><p>Roadmap</p>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-sm mb-3">Company</h4>
-              <div className="space-y-2 text-sm text-gray-400">
-                <p>About</p><p>Blog</p><p>Contact</p><p>Privacy Policy</p>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-sm mb-3">Follow Us</h4>
-              <div className="flex gap-3">
-                {['𝕏', '📸', '💼', '🐙'].map((icon, i) => (
-                  <button key={i} className="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-sm transition-colors">
-                    {icon}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-500">
-            © 2024 StudySphere. Built with ❤️ for students.
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };
 
 export default LandingPage;
+

@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { aiAPI } from '../../services/api';
 import {
   Brain, Send, Sparkles, BookOpen, HelpCircle, FileText,
-  RotateCcw, Copy, Check, User, Bot, Loader2, ArrowRight
+  RotateCcw, Copy, Check, User, Bot, Loader2, ArrowRight, Zap, CheckCircle2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -88,7 +88,6 @@ const AIAssistant = () => {
     toast.success('Copied to clipboard');
   };
 
-  // Generate Quiz
   const handleGenerateQuiz = async () => {
     setQuizLoading(true);
     setQuizQuestions([]);
@@ -108,7 +107,6 @@ const AIAssistant = () => {
     }
   };
 
-  // Generate Summary / Cheat sheet
   const handleGenerateSummary = async () => {
     if (!summaryTopic.trim() && !summaryInputText.trim()) {
       toast.error('Please enter a topic or paste notes to summarize');
@@ -130,52 +128,52 @@ const AIAssistant = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-violet-500/20">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-white/80 dark:bg-dark-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 shadow-card">
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-600 via-indigo-600 to-pink-500 text-white flex items-center justify-center shadow-lg shadow-violet-500/25 flex-shrink-0">
             <Brain size={24} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              AI Study Assistant
-              <span className="text-xs font-semibold bg-violet-100 dark:bg-violet-950/60 text-violet-700 dark:text-violet-300 px-2.5 py-0.5 rounded-full">
+            <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2.5 tracking-tight">
+              AI Academic Workspace
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20 px-2.5 py-0.5 rounded-full">
                 Gemini Powered
               </span>
             </h1>
-            <p className="text-sm text-gray-500">24/7 personalized academic tutor & exam preparation partner</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">24/7 Academic doubt solver, MCQ test generator, and revision summarizer</p>
           </div>
         </div>
 
-        {/* Tab selection */}
-        <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+        {/* Tab selector */}
+        <div className="flex bg-slate-100 dark:bg-dark-850 p-1.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
           <button
             onClick={() => setActiveTab('chat')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'chat'
-                ? 'bg-white dark:bg-gray-900 text-violet-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                ? 'bg-white dark:bg-dark-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Doubt Solver
           </button>
           <button
             onClick={() => setActiveTab('quiz')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'quiz'
-                ? 'bg-white dark:bg-gray-900 text-violet-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                ? 'bg-white dark:bg-dark-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Quiz Generator
           </button>
           <button
             onClick={() => setActiveTab('cheat-sheet')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'cheat-sheet'
-                ? 'bg-white dark:bg-gray-900 text-violet-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                ? 'bg-white dark:bg-dark-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Revision Notes
@@ -183,20 +181,20 @@ const AIAssistant = () => {
         </div>
       </div>
 
-      {/* TAB 1: Interactive Chat */}
+      {/* TAB 1: Interactive Chat Doubt Solver */}
       {activeTab === 'chat' && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col h-[650px] overflow-hidden">
+        <div className="bg-white/90 dark:bg-dark-900/90 backdrop-blur-xl rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-card flex flex-col h-[650px] overflow-hidden">
           {/* Chat message stream */}
-          <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {messages.map((m, idx) => (
               <div
                 key={idx}
                 className={`flex gap-3 max-w-3xl ${m.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}
               >
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-bold ${
+                  className={`w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 text-white text-xs font-bold shadow-sm ${
                     m.role === 'user'
-                      ? 'bg-primary-600'
+                      ? 'bg-indigo-600'
                       : 'bg-gradient-to-tr from-violet-600 to-indigo-600'
                   }`}
                 >
@@ -204,10 +202,10 @@ const AIAssistant = () => {
                 </div>
 
                 <div
-                  className={`rounded-2xl p-4 text-sm leading-relaxed relative group ${
+                  className={`rounded-2xl p-4 text-xs sm:text-sm leading-relaxed relative group ${
                     m.role === 'user'
-                      ? 'bg-primary-600 text-white rounded-tr-none'
-                      : 'bg-gray-50 dark:bg-gray-800/80 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-700/60 rounded-tl-none whitespace-pre-line'
+                      ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-tr-none shadow-md'
+                      : 'bg-slate-100/80 dark:bg-dark-850/90 text-slate-800 dark:text-slate-200 border border-slate-200/60 dark:border-slate-800/80 rounded-tl-none whitespace-pre-line'
                   }`}
                 >
                   {m.text}
@@ -215,10 +213,10 @@ const AIAssistant = () => {
                   {m.role === 'assistant' && (
                     <button
                       onClick={() => handleCopyMessage(m.text, idx)}
-                      className="absolute right-2 top-2 p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity rounded"
+                      className="absolute right-2.5 top-2.5 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg bg-white/50 dark:bg-dark-900/50"
                       title="Copy response"
                     >
-                      {copiedIndex === idx ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                      {copiedIndex === idx ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                     </button>
                   )}
                 </div>
@@ -227,30 +225,30 @@ const AIAssistant = () => {
 
             {loading && (
               <div className="flex gap-3 max-w-3xl">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center text-white">
+                <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center text-white shadow-sm">
                   <Bot size={16} />
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-800/80 rounded-2xl rounded-tl-none p-4 flex items-center gap-2 text-xs text-gray-500 border border-gray-100 dark:border-gray-700">
-                  <Loader2 size={16} className="animate-spin text-violet-600" />
-                  <span>StudySphere AI is thinking...</span>
+                <div className="bg-slate-100/80 dark:bg-dark-850/90 rounded-2xl rounded-tl-none p-4 flex items-center gap-2.5 text-xs font-semibold text-slate-500 border border-slate-200/60 dark:border-slate-800/80">
+                  <Loader2 size={16} className="animate-spin text-indigo-600 dark:text-indigo-400" />
+                  <span>StudySphere AI is analyzing academic query...</span>
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick prompts */}
-          <div className="px-5 py-2.5 bg-gray-50/50 dark:bg-gray-800/40 border-t border-gray-100 dark:border-gray-800 overflow-x-auto">
+          {/* Quick Prompt Suggestions Ticker */}
+          <div className="px-6 py-3 bg-slate-50/80 dark:bg-dark-850/50 border-t border-slate-200/70 dark:border-slate-800/70 overflow-x-auto">
             <div className="flex items-center gap-2 text-xs whitespace-nowrap">
-              <span className="text-gray-400 font-medium flex items-center gap-1">
-                <Sparkles size={12} className="text-violet-500" /> Suggestions:
+              <span className="text-slate-400 font-bold flex items-center gap-1">
+                <Sparkles size={12} className="text-violet-500" /> Exam Prompts:
               </span>
               {PROMPT_SUGGESTIONS.map((suggestion, sIdx) => (
                 <button
                   key={sIdx}
                   type="button"
                   onClick={() => handleSendChat(suggestion)}
-                  className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-violet-400 px-2.5 py-1 rounded-full text-gray-600 dark:text-gray-300 transition-colors"
+                  className="bg-white dark:bg-dark-900 border border-slate-200 dark:border-slate-800 hover:border-violet-500 px-3 py-1 rounded-full text-slate-600 dark:text-slate-300 font-medium transition-colors text-[11px]"
                 >
                   {suggestion}
                 </button>
@@ -258,8 +256,8 @@ const AIAssistant = () => {
             </div>
           </div>
 
-          {/* Chat input box */}
-          <div className="p-4 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+          {/* Input Box */}
+          <div className="p-4 bg-white dark:bg-dark-900 border-t border-slate-200/70 dark:border-slate-800/70">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -269,16 +267,16 @@ const AIAssistant = () => {
             >
               <input
                 type="text"
-                placeholder="Ask any academic doubt (e.g. explain normal forms or prove Master theorem)..."
+                placeholder="Ask any academic doubt (e.g. explain 3NF vs BCNF or prove Master Theorem)..."
                 value={inputQuestion}
                 onChange={(e) => setInputQuestion(e.target.value)}
                 disabled={loading}
-                className="input flex-1 h-12 text-sm"
+                className="input flex-1 h-12 text-xs sm:text-sm"
               />
               <button
                 type="submit"
                 disabled={loading || !inputQuestion.trim()}
-                className="btn btn-primary h-12 px-5 flex items-center justify-center gap-2"
+                className="btn-primary h-12 px-6 font-bold flex items-center justify-center gap-2 shadow-indigo-500/20"
               >
                 <Send size={16} />
                 <span className="hidden sm:inline">Ask AI</span>
@@ -290,13 +288,13 @@ const AIAssistant = () => {
 
       {/* TAB 2: Quiz & Test Generator */}
       {activeTab === 'quiz' && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm space-y-6">
+        <div className="bg-white/90 dark:bg-dark-900/90 backdrop-blur-xl rounded-3xl border border-slate-200/80 dark:border-slate-800/80 p-7 shadow-card space-y-6">
           <div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <HelpCircle className="text-violet-600" size={20} />
+            <h2 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <HelpCircle className="text-indigo-600 dark:text-indigo-400" size={20} />
               Instant Quiz & Exam Self-Assessment
             </h2>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
               Select your subject and topic to generate exam-standard practice questions with instant evaluation.
             </p>
           </div>
@@ -332,7 +330,7 @@ const AIAssistant = () => {
                   type="button"
                   onClick={handleGenerateQuiz}
                   disabled={quizLoading}
-                  className="btn btn-primary text-xs px-5 inline-flex items-center gap-2 whitespace-nowrap"
+                  className="btn-primary text-xs px-5 inline-flex items-center gap-2 whitespace-nowrap font-bold"
                 >
                   {quizLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
                   <span>Generate Quiz</span>
@@ -342,45 +340,45 @@ const AIAssistant = () => {
           </div>
 
           {quizLoading && (
-            <div className="py-12 flex flex-col items-center justify-center gap-3">
-              <Loader2 size={28} className="animate-spin text-violet-600" />
-              <p className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+            <div className="py-14 flex flex-col items-center justify-center gap-3">
+              <Loader2 size={32} className="animate-spin text-indigo-600 dark:text-indigo-400" />
+              <p className="text-xs font-bold text-slate-600 dark:text-slate-300">
                 Crafting targeted practice questions for {quizSubject}...
               </p>
             </div>
           )}
 
           {!quizLoading && quizQuestions.length > 0 && (
-            <div className="space-y-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+            <div className="space-y-6 pt-5 border-t border-slate-200/70 dark:border-slate-800/70">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                   Practice Questions ({quizQuestions.length})
                 </h3>
                 {!quizEvaluated ? (
                   <button
                     onClick={() => setQuizEvaluated(true)}
-                    className="btn btn-primary text-xs py-1.5 px-4"
+                    className="btn-primary text-xs py-2 px-5 font-bold"
                   >
                     Submit & Evaluate
                   </button>
                 ) : (
                   <button
                     onClick={() => { setUserAnswers({}); setQuizEvaluated(false); }}
-                    className="btn btn-secondary text-xs py-1.5 px-4 inline-flex items-center gap-1.5"
+                    className="btn-secondary text-xs py-2 px-4 font-bold inline-flex items-center gap-1.5"
                   >
                     <RotateCcw size={14} />
-                    <span>Reset Answers</span>
+                    <span>Reset Quiz</span>
                   </button>
                 )}
               </div>
 
-              <div className="space-y-5">
+              <div className="space-y-4">
                 {quizQuestions.map((q, qIdx) => (
                   <div
                     key={qIdx}
-                    className="p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40 space-y-3"
+                    className="p-5 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 bg-slate-50/50 dark:bg-dark-850/50 space-y-3"
                   >
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                    <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
                       {qIdx + 1}. {q.question || q}
                     </p>
 
@@ -400,18 +398,18 @@ const AIAssistant = () => {
                                   setUserAnswers(prev => ({ ...prev, [qIdx]: optIdx }));
                                 }
                               }}
-                              className={`w-full text-left text-xs p-3 rounded-lg border transition-all flex items-center justify-between ${
+                              className={`w-full text-left text-xs p-3.5 rounded-xl border transition-all flex items-center justify-between font-medium ${
                                 isCorrect
-                                  ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-800 dark:text-emerald-300 font-medium'
+                                  ? 'bg-emerald-500/10 border-emerald-500 text-emerald-700 dark:text-emerald-300 font-bold'
                                   : isWrong
-                                  ? 'bg-red-50 dark:bg-red-950/40 border-red-500 text-red-800 dark:text-red-300'
+                                  ? 'bg-rose-500/10 border-rose-500 text-rose-700 dark:text-rose-300'
                                   : isSelected
-                                  ? 'bg-violet-50 dark:bg-violet-950/40 border-violet-500 text-violet-900 dark:text-violet-200'
-                                  : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                  ? 'bg-indigo-500/10 border-indigo-500 text-indigo-900 dark:text-indigo-200 font-bold'
+                                  : 'bg-white dark:bg-dark-900 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-dark-800'
                               }`}
                             >
                               <span>{opt}</span>
-                              {isCorrect && <Check size={14} className="text-emerald-600" />}
+                              {isCorrect && <Check size={14} className="text-emerald-500" />}
                             </button>
                           );
                         })}
@@ -419,7 +417,7 @@ const AIAssistant = () => {
                     )}
 
                     {quizEvaluated && q.explanation && (
-                      <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 text-xs text-blue-800 dark:text-blue-300">
+                      <div className="p-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-900/60 text-xs text-indigo-900 dark:text-indigo-300 leading-relaxed">
                         <strong>Explanation:</strong> {q.explanation}
                       </div>
                     )}
@@ -433,13 +431,13 @@ const AIAssistant = () => {
 
       {/* TAB 3: Cheat Sheet & Revision Notes */}
       {activeTab === 'cheat-sheet' && (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm space-y-6">
+        <div className="bg-white/90 dark:bg-dark-900/90 backdrop-blur-xl rounded-3xl border border-slate-200/80 dark:border-slate-800/80 p-7 shadow-card space-y-6">
           <div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <FileText className="text-violet-600" size={20} />
-              AI Fast-Revision Sheet & Summarizer
+            <h2 className="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <FileText className="text-indigo-600 dark:text-indigo-400" size={20} />
+              AI Fast-Revision Sheet Generator
             </h2>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
               Condense entire units into key exam points, formulas, bullet points, and high-yield questions.
             </p>
           </div>
@@ -470,7 +468,7 @@ const AIAssistant = () => {
             <button
               onClick={handleGenerateSummary}
               disabled={summaryLoading}
-              className="btn btn-primary inline-flex items-center gap-2 text-xs px-5"
+              className="btn-primary inline-flex items-center gap-2 text-xs px-6 font-bold"
             >
               {summaryLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
               <span>Generate Revision Summary</span>
@@ -478,20 +476,20 @@ const AIAssistant = () => {
           </div>
 
           {summaryResult && (
-            <div className="p-5 rounded-2xl border border-violet-100 dark:border-violet-900/40 bg-violet-50/20 dark:bg-violet-950/10 space-y-3">
-              <div className="flex items-center justify-between border-b border-violet-200/50 dark:border-violet-800/40 pb-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-violet-600">
-                  Quick Revision Notes
+            <div className="p-6 rounded-2xl border border-indigo-500/20 bg-indigo-50/20 dark:bg-indigo-950/20 space-y-3">
+              <div className="flex items-center justify-between border-b border-indigo-500/20 pb-3">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                  Quick Revision Notes Output
                 </span>
                 <button
                   onClick={() => { navigator.clipboard.writeText(summaryResult); toast.success('Copied!'); }}
-                  className="text-xs text-gray-500 hover:text-gray-900 inline-flex items-center gap-1"
+                  className="text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white inline-flex items-center gap-1 font-bold"
                 >
-                  <Copy size={13} /> Copy
+                  <Copy size={13} /> Copy All
                 </button>
               </div>
 
-              <div className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-line leading-relaxed">
+              <div className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 whitespace-pre-line leading-relaxed font-sans">
                 {summaryResult}
               </div>
             </div>
@@ -503,3 +501,4 @@ const AIAssistant = () => {
 };
 
 export default AIAssistant;
+

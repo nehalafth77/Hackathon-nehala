@@ -1,19 +1,19 @@
 import React from 'react';
-import { CheckCircle, Clock, XCircle, Star, Shield } from 'lucide-react';
+import { CheckCircle2, Clock, XCircle, Star, ShieldCheck, Sparkles } from 'lucide-react';
 
 const statusConfig = {
   verified: {
     label: 'Teacher Verified',
-    icon: CheckCircle,
+    icon: CheckCircle2,
     className: 'badge-verified',
   },
   pending: {
-    label: 'Pending Verification',
+    label: 'Pending Review',
     icon: Clock,
     className: 'badge-pending',
   },
   rejected: {
-    label: 'Rejected',
+    label: 'Needs Fix',
     icon: XCircle,
     className: 'badge-rejected',
   },
@@ -24,7 +24,7 @@ export const StatusBadge = ({ status }) => {
   const Icon = config.icon;
   return (
     <span className={config.className}>
-      <Icon size={11} />
+      <Icon size={12} />
       {config.label}
     </span>
   );
@@ -32,46 +32,37 @@ export const StatusBadge = ({ status }) => {
 
 export const OfficialBadge = () => (
   <span className="badge-official">
-    <Shield size={11} />
-    Official
+    <ShieldCheck size={12} />
+    Official Handout
   </span>
 );
 
 export const ImportantBadge = () => (
   <span className="badge-important">
-    <Star size={11} />
-    Important
+    <Star size={12} />
+    High Yield
   </span>
 );
 
 export const TypeBadge = ({ type }) => {
-  const colors = {
-    pdf: 'bg-red-50 text-red-700 border-red-200',
-    doc: 'bg-blue-50 text-blue-700 border-blue-200',
-    ppt: 'bg-orange-50 text-orange-700 border-orange-200',
-    image: 'bg-purple-50 text-purple-700 border-purple-200',
-    notes: 'bg-green-50 text-green-700 border-green-200',
-    video: 'bg-pink-50 text-pink-700 border-pink-200',
-    link: 'bg-cyan-50 text-cyan-700 border-cyan-200',
-    'question-paper': 'bg-yellow-50 text-yellow-700 border-yellow-200',
-    assignment: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+  const typeMap = {
+    pdf: { label: 'PDF', bg: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' },
+    doc: { label: 'DOC', bg: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' },
+    ppt: { label: 'PPT', bg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' },
+    image: { label: 'IMG', bg: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20' },
+    notes: { label: 'Notes', bg: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' },
+    video: { label: 'Video', bg: 'bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20' },
+    link: { label: 'Link', bg: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20' },
+    'question-paper': { label: 'PYQ', bg: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20' },
+    assignment: { label: 'Task', bg: 'bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20' },
   };
 
-  const labels = {
-    pdf: 'PDF',
-    doc: 'DOC',
-    ppt: 'PPT',
-    image: 'Image',
-    notes: 'Notes',
-    video: 'Video',
-    link: 'Link',
-    'question-paper': 'Q-Paper',
-    assignment: 'Assignment',
-  };
+  const item = typeMap[type] || { label: type?.toUpperCase() || 'FILE', bg: 'bg-slate-500/10 text-slate-600 border-slate-500/20' };
 
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${colors[type] || colors.pdf}`}>
-      {labels[type] || type.toUpperCase()}
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold border ${item.bg}`}>
+      {item.label}
     </span>
   );
 };
+
